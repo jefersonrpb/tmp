@@ -58,7 +58,7 @@ void clear()
 
 void draw_col(int row, int col, char *str)
 {
-    printf("%c[%d;%df%s", 0x1B, row, col, str);
+    printf("%c[%d;%df%s\n\r", 0x1B, row, col, str);
 }
 
 void set_current_user_locale()
@@ -85,8 +85,8 @@ void draw(Game * game)
     clear();
     for (int row = 0, it = 0; row < game->board->rows; row++) {
         for (int col = 0; col < game->board->cols; col++) {
-            /* draw_col(row, col, "."); */
-            printf("[%d][%d] = %d\n", row, col, game->board->grid[row][col]);
+            draw_col(row, col, ".");
+            /* printf("[%d][%d] = %d\n", row, col, game->board->grid[row][col]); */
         }
     } 
 }
@@ -114,8 +114,13 @@ Board *create_board(int rows, int cols)
 
 void tick(Game *game)
 {
-    update();
-    draw(game);
+    int iterations = 10;
+    while (iterations-- > 0) {
+    
+        update();
+        draw(game);
+        sleep(1);
+    }
 }
 
 Game *create_game(Board *board)
