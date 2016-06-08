@@ -1,0 +1,1 @@
+gcc src/game.c -o bin/game -I inc -lncurses &&  bin/game getch
