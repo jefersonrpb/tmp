@@ -36,6 +36,7 @@ void main()
     clear(); // curses call to clear screen, send cursor to position (0,0)
     refresh(); // curses call to implement all changes since last refresh
 
+    timeout(1000/60);
     r = 0; c = 0;
     while (1) {
         d = getch(); // curses call to input from keyboard
