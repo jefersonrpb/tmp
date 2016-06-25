@@ -13,6 +13,8 @@
     fprintf(stderr, "[error] line %d: %s\n", __LINE__, msg);\
 abort();
 
+char cBlock = (char)0x2588;
+
 typedef struct {
     char **grid;
     int rows;
@@ -39,10 +41,10 @@ void set_current_user_locale()
     locale = setlocale(LC_ALL, "");
 }
 
+WINDOW *wnd;
+
 void create_window(int *rows, int *cols)
 {
-    WINDOW *wnd;
-
     // curses call to initialize window
     wnd = initscr(); 
 
@@ -68,7 +70,17 @@ void create_window(int *rows, int *cols)
     keypad(stdscr, TRUE);
 
     // input timeout
-    timeout(0);//1000/8);   
+    /* timeout(0);//1000/8);    */
+
+
+    /* SETTING UNIVERSAL I/O OPTIONS */
+    raw();                          //Immediately record keystroke & don't interpret control characters
+    noecho();                       //Disable Echo
+    /* keypad(stdscr, TRUE);           //Enable input of control keys */
+    /* curs_set(0);                    //Disable cursor */
+
+    //KEY DELAY: PROGRAM STATE DEPENDENT
+    nodelay(stdscr, TRUE);          //Disable waiting for user input
 }
 
 void restore_window()
@@ -85,24 +97,30 @@ void quit()
 
 void update_aim()
 {
-    game->board->grid[aim->row][aim->col -1] = '[';
-    game->board->grid[aim->row][aim->col +1] = ']';
+    /* printw("A_REVERSE: "); addch(A_REVERSE); printw("\n"); */
+    /* printw("0x2588:"); addch(cBlock); printw("\n"); */
+    /* game->board->grid[aim->row][aim->col] = cBlock; */
+    game->board->grid[aim->row][aim->col] = cBlock;
+    /* "\u25A0" */
 }
 
 void draw_char(int row, int col, char value)
 {
     move(row, col);
     /* delch(); */
-    insch(value);
+
+    if (value != ' ') {
+        /* insch(value);     */
+        /* insch("\u25A0");     */
+        insch(ACS_DIAMOND);
+        /* addch((int) "\u25A0");  */
+    }
 
     /* mvprintw(row, col, value);  */
 }
 
 void update()
 {
-    game->board->grid[aim->row][aim->col -1] = ' ';
-    game->board->grid[aim->row][aim->col +1] = ' ';
-
     game->keypress = getch();
 
     if (game->keypress == 'q') {
@@ -159,14 +177,14 @@ Board *create_board(int rows, int cols)
     char **grid;
 
     Board * board = malloc(sizeof(Board));
-    grid = malloc(rows * cols * sizeof(int *));
+    grid = malloc(rows * cols * sizeof(char *));
 
     board->grid = grid;
     board->rows = rows;
     board->cols = cols;
 
     for (int row = 0, it = 0; row < board->rows; row++) {
-        board->grid[row] = malloc(cols * sizeof(int));
+        board->grid[row] = malloc(cols * sizeof(char));
         for (int col = 0; col < board->cols; col++) {
             board->grid[row][col] = ' ';
         }
