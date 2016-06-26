@@ -1,39 +1,54 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <locale.h>
-#include <string.h>
+#include "game.h"
 
-// PDF: http://heather.cs.ucdavis.edu/~matloff/UnixAndC/CLanguage/Curses.pdf
-#include <curses.h>
+Player * player;
+WINDOW * window;
 
-// sleep
-#include <unistd.h>
+const int FPS = 1000000 / 60;
+int HEIGHT;
+int WIDTH;
+int keypress;
+char **map;
 
-#define fatal(msg)\
-    fprintf(stderr, "[error] line %d: %s\n", __LINE__, msg);\
-abort();
+int main(int argc, char **argv)
+{
+    set_current_user_locale(); 
+    create_window();
+    create_map();
+    create_player();
+    tick(); 
+    return 0;
+}
 
-char cBlock = (char)0x2588;
+void tick()
+{
+    do {
+        update();
+        draw();
+        usleep(FPS);
+    } while (true);
+} 
 
-typedef struct {
-    char **grid;
-    int rows;
-    int cols;
-} Board;
+void update()
+{
+    keypress = getch();
 
-typedef struct {
-    int row;
-    int col;
-    bool fire;
-} Aim;
+    if (keypress == 'q') {
+        quit();
+    }
 
-typedef struct {
-    Board *board;
-    int keypress;
-} Game; 
+    update_player();
+} 
 
-Game * game;
-Aim * aim;
+void draw()
+{
+    erase();
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0, it = 0; y < HEIGHT; y++) {
+            draw_char(y, x, map[x][y]);
+        }
+    } 
+    refresh();
+}
 
 void set_current_user_locale()
 {
@@ -41,26 +56,24 @@ void set_current_user_locale()
     locale = setlocale(LC_ALL, "");
 }
 
-WINDOW *wnd;
-
-void create_window(int *rows, int *cols)
+void create_window()
 {
-    // curses call to initialize window
-    wnd = initscr(); 
+    // initialize window
+    window = initscr(); 
 
-    // curses call to set no waiting for Enter key
+    // set no waiting for Enter key
     cbreak(); 
 
-    // curses call to set no echoing
+    // disable Echo
     noecho(); 
 
-    // curses call to find size of window
-    getmaxyx(wnd, *rows, *cols); 
+    // find size of window
+    getmaxyx(window, HEIGHT, WIDTH); 
 
-    // curses call to clear screen, send cursor to position (0,0)
+    // clear screen, send cursor to position (0,0)
     clear(); 
 
-    // curses call to implement all changes since last refresh
+    // implement all changes since last refresh
     refresh(); 
 
     // don't display a cursor
@@ -69,18 +82,28 @@ void create_window(int *rows, int *cols)
     // enable keyboard mapping
     keypad(stdscr, TRUE);
 
-    // input timeout
-    /* timeout(0);//1000/8);    */
+    //Immediately record keystroke & don't interpret control characters
+    raw();
 
+    // disable waiting for user input
+    nodelay(stdscr, TRUE);
+}
 
-    /* SETTING UNIVERSAL I/O OPTIONS */
-    raw();                          //Immediately record keystroke & don't interpret control characters
-    noecho();                       //Disable Echo
-    /* keypad(stdscr, TRUE);           //Enable input of control keys */
-    /* curs_set(0);                    //Disable cursor */
+void create_map()
+{
+    map = malloc(HEIGHT * WIDTH * sizeof(char *));
 
-    //KEY DELAY: PROGRAM STATE DEPENDENT
-    nodelay(stdscr, TRUE);          //Disable waiting for user input
+    for (int x = 0; x < WIDTH; x++) {
+        map[x] = malloc(HEIGHT * sizeof(char *));
+        for (int y = 0, it = 0; y < HEIGHT; y++) {
+            map[x][y] = ' ';
+        }
+    }
+} 
+
+void create_player()
+{
+    player = malloc(sizeof(Player));
 }
 
 void restore_window()
@@ -95,140 +118,28 @@ void quit()
     exit(0);
 } 
 
-void update_aim()
+void draw_char(int y, int x, char value)
 {
-    /* printw("A_REVERSE: "); addch(A_REVERSE); printw("\n"); */
-    /* printw("0x2588:"); addch(cBlock); printw("\n"); */
-    /* game->board->grid[aim->row][aim->col] = cBlock; */
-    game->board->grid[aim->row][aim->col] = cBlock;
-    /* "\u25A0" */
-}
-
-void draw_char(int row, int col, char value)
-{
-    move(row, col);
-    /* delch(); */
-
     if (value != ' ') {
-        /* insch(value);     */
-        /* insch("\u25A0");     */
-        insch(ACS_DIAMOND);
-        /* addch((int) "\u25A0");  */
+        mvaddch(y, x, ACS_CKBOARD);
     }
-
-    /* mvprintw(row, col, value);  */
 }
 
-void update()
+void update_player()
 {
-    game->keypress = getch();
-
-    if (game->keypress == 'q') {
-        quit();
+    if (keypress == KEY_LEFT) {
+        player->direction = LEFT;
     }
 
-    if (game->keypress == KEY_LEFT) {
-        aim->col -= 1;
+    if (keypress == KEY_RIGHT) {
+        player->direction = RIGHT;
     }
 
-    if (game->keypress == KEY_RIGHT) {
-        aim->col += 1;
+    if (keypress == KEY_UP) {
+        player->direction = UP;
     }
 
-    if (game->keypress == KEY_UP) {
-        aim->row -= 1;
+    if (keypress == KEY_DOWN) {
+        player->direction = DOWN;
     }
-
-    if (game->keypress == KEY_DOWN) {
-        aim->row += 1;
-    }
-
-    if (aim->row > game->board->rows - 1) {
-        aim->row = game->board->rows - 1;
-    }
-
-    if (aim->col > game->board->cols - 2) {
-        aim->col = game->board->cols - 2;
-    }
-
-    if (aim->col < 1) {
-        aim->col = 1;
-    }
-    if (aim->row < 0) {
-        aim->row = 0;
-    }
-
-    update_aim();
-} 
-
-void draw()
-{
-    erase();
-    for (int row = 0, it = 0; row < game->board->rows; row++) {
-        for (int col = 0; col < game->board->cols; col++) {
-            draw_char(row, col, game->board->grid[row][col]);
-        }
-    } 
-    refresh();
-}
-
-Board *create_board(int rows, int cols)
-{
-    char **grid;
-
-    Board * board = malloc(sizeof(Board));
-    grid = malloc(rows * cols * sizeof(char *));
-
-    board->grid = grid;
-    board->rows = rows;
-    board->cols = cols;
-
-    for (int row = 0, it = 0; row < board->rows; row++) {
-        board->grid[row] = malloc(cols * sizeof(char));
-        for (int col = 0; col < board->cols; col++) {
-            board->grid[row][col] = ' ';
-        }
-    }
-
-    return board;
-}
-
-void tick()
-{
-    int iterations = 10, fps = 1000/60;
-
-    do {
-        update();
-        draw();
-        /* usleep(fps); */
-    } while (true);
-}
-
-Game *create_game(Board *board)
-{
-    game = malloc(sizeof(Game));
-    game->board = board;
-
-    aim = malloc(sizeof(Aim));
-
-    return game;
-}
-
-int main(int argc, char **argv)
-{
-    set_current_user_locale(); 
-
-    // get terminal size
-    int winsize_rows, winsize_cols;
-    create_window(&winsize_rows, &winsize_cols);
-
-    Board *board = create_board(winsize_rows, winsize_cols);
-    create_game(board);
-
-    // loop game
-    tick(); 
-
-    quit();
-
-    return 0;
 }
