@@ -12,14 +12,14 @@ typedef struct {
     int y;
     int x;
     int direction;
-} Player;
+} Moto;
 
-enum direction {UP, DOWN, RIGHT, LEFT};
+enum direction {UP, DOWN, RIGHT, LEFT, WALL, EMPTY};
 
 void set_current_user_locale();
 void create_window();
 void create_map();
-void create_player();
+void create_players();
 void restore_window();
 void quit();
 void draw_char(int y, int x, char value);
@@ -27,5 +27,9 @@ void update_player();
 void update();
 void draw();
 void tick();
+void game_over();
+void find_player_direction();
+void update_player_position();
+void check_player_collision();
 
 #endif //GAME_INCLUDED
