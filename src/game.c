@@ -2,14 +2,14 @@
 
 // pointers
 Moto * ptr_player;
-Moto * ptr_enemy;
+Moto * ptr_ai;
 WINDOW * ptr_window;
 
 // players
-Moto player, enemy; 
+Moto player, ai; 
 
 // screen size
-int SCREEN_HEIGHT, SCREEN_WIDTH;
+int screen_height, screen_width;
 
 // key code
 int keypress;
@@ -72,12 +72,12 @@ void create_window()
     // initialize window
     ptr_window = initscr(); 
 
-    getmaxyx(ptr_window, SCREEN_HEIGHT, SCREEN_WIDTH); 
+    getmaxyx(ptr_window, screen_height, screen_width); 
 
-    if (SCREEN_HEIGHT < GAME_HEIGHT || SCREEN_WIDTH < GAME_WIDTH) {
+    if (screen_height < GAME_HEIGHT || screen_width < GAME_WIDTH) {
         restore_window();
         printf(" - you need resize terminal to: cols %d rows %d", GAME_WIDTH, GAME_HEIGHT);
-        printf("\n - current size: cols %d rows %d\n", SCREEN_WIDTH, SCREEN_HEIGHT);
+        printf("\n - current size: cols %d rows %d\n", screen_width, screen_height);
         exit(1);
     } 
 
@@ -123,10 +123,10 @@ void create_map()
 void create_players()
 {
     ptr_player = malloc(sizeof(player));
-    ptr_enemy = malloc(sizeof(enemy));
+    ptr_ai = malloc(sizeof(ai));
 
     player = *ptr_player;
-    enemy = *ptr_enemy;
+    ai = *ptr_ai;
 
     player.direction = RIGHT;
     player.x = 0;
