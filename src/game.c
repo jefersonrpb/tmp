@@ -5,22 +5,11 @@ Moto * ptr_player;
 Moto * ptr_enemy;
 WINDOW * ptr_window;
 
-Moto player;
-Moto enemy; 
-
-// tick
-const int FPS = 1000000 / 10;
+// players
+Moto player, enemy; 
 
 // screen size
 int SCREEN_HEIGHT, SCREEN_WIDTH;
-
-// map size
-#define MAP_HEIGHT 40
-#define MAP_WIDTH 80 
-
-// game size
-int GAME_HEIGHT = MAP_HEIGHT + 2;
-int GAME_WIDTH = MAP_WIDTH + 2;
 
 // key code
 int keypress;
@@ -28,25 +17,12 @@ int keypress;
 // 2d array
 char **map;
 
-void rectangle(int y1, int x1, int y2, int x2)
-{
-    mvhline(y1, x1, 0, x2-x1);
-    mvhline(y2, x1, 0, x2-x1);
-    mvvline(y1, x1, 0, y2-y1);
-    mvvline(y1, x2, 0, y2-y1);
-    mvaddch(y1, x1, ACS_ULCORNER);
-    mvaddch(y2, x1, ACS_LLCORNER);
-    mvaddch(y1, x2, ACS_URCORNER);
-    mvaddch(y2, x2, ACS_LRCORNER);
-}
-
 int main(int argc, char **argv)
 {
-    set_current_user_locale(); 
+    set_locale(); 
     create_window();
     create_map();
     create_players();
-
     tick(); 
     return 0;
 }
@@ -74,11 +50,8 @@ void update()
 void draw()
 {
     erase();
-
-    rectangle(0, 0, GAME_HEIGHT-1, GAME_WIDTH-1);
-
+    draw_rectangle(0, 0, GAME_WIDTH-1, GAME_HEIGHT-1);
     mvprintw(0, 0, "%dx%d | %dx%d", player.x, player.y, MAP_WIDTH, MAP_HEIGHT); 
-
 
     for (int x = 0; x < MAP_WIDTH; x++) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -88,7 +61,7 @@ void draw()
     refresh();
 }
 
-void set_current_user_locale()
+void set_locale()
 {
     char *locale;
     locale = setlocale(LC_ALL, "");
@@ -217,4 +190,16 @@ void game_over()
 {
     sleep(2);
     quit();
+}
+
+void draw_rectangle(int x, int y, int width, int height)
+{
+    mvhline(y, x, 0, width-x);
+    mvhline(height, x, 0, width-x);
+    mvvline(y, x, 0, height-y);
+    mvvline(y, width, 0, height-y);
+    mvaddch(y, x, ACS_ULCORNER);
+    mvaddch(height, x, ACS_LLCORNER);
+    mvaddch(y, width, ACS_URCORNER);
+    mvaddch(height, width, ACS_LRCORNER);
 }

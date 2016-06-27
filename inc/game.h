@@ -14,9 +14,15 @@ typedef struct {
     int direction;
 } Moto;
 
-enum direction {UP, DOWN, RIGHT, LEFT, WALL, EMPTY};
+enum {UP, DOWN, RIGHT, LEFT, WALL, EMPTY};
 
-void set_current_user_locale();
+#define FPS 1000000 / 10
+#define MAP_HEIGHT 20
+#define MAP_WIDTH 40 
+#define GAME_HEIGHT MAP_HEIGHT + 2
+#define GAME_WIDTH MAP_WIDTH + 2
+
+void set_locale();
 void create_window();
 void create_map();
 void create_players();
@@ -28,6 +34,7 @@ void update();
 void draw();
 void tick();
 void game_over();
+void draw_rectangle(int x, int y, int width, int height);
 void find_player_direction();
 void update_player_position();
 void check_player_collision();
