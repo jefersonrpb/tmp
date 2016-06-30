@@ -4,19 +4,21 @@
 Moto **ptr_players;
 WINDOW *ptr_window;
 
-// screen size
-int screen_height, screen_width;
+// 2d array
+char **map;
 
 // key code
 int keypress;
 
-// 2d array
-char **map;
-
-int max_players = 2;
+// sizes
+int screen_height, screen_width;
+int map_width, map_height; 
+int game_width, game_height;
+int max_players;
 
 int main(int argc, char **argv)
 {
+    process_args(argc, argv);
     // initialize random seed
     srand (time(NULL));
     set_locale(); 
@@ -39,44 +41,43 @@ void tick()
 void update()
 {
     keypress = getch();
-
     if (keypress == 'q') {
         quit();
     }
 
+    input_player_direction(ptr_players[0]);
     for (size_t i = 0; i < max_players; i++) {
-
-        if (i == 0) {
-            input_player_direction(ptr_players[i]);
-        } else {
-            update_dumb_ai(ptr_players[i]);
-        }
-
+        if (i > 0) update_dumb_ai(ptr_players[i]);
         update_player_velocity(ptr_players[i]);
         update_player_position(ptr_players[i]);
         check_player_collision(ptr_players[i]);
-        draw_wall(ptr_players[i]);
+        fulfill_wall(ptr_players[i]);
     }
 } 
 
 void draw()
 {
     erase();
-    draw_rectangle(0, 0, GAME_WIDTH-1, GAME_HEIGHT-1);
-    mvprintw(0, 0, "%dx%d | %dx%d", ptr_players[0]->position.x, ptr_players[0]->position.y, MAP_WIDTH, MAP_HEIGHT); 
-
-    for (int x = 0; x < MAP_WIDTH; x++) {
-        for (int y = 0; y < MAP_HEIGHT; y++) {
+    draw_rectangle(0, 0, game_width-1, game_height-1);
+    mvprintw(0, 0, "%dx%d | %dx%d", ptr_players[0]->position.x, ptr_players[0]->position.y, map_width, map_height); 
+    for (int x = 0; x < map_width; x++) {
+        for (int y = 0; y < map_height; y++) {
             draw_char(x, y, map[x][y]);
         }
     } 
     refresh();
 }
 
+void process_args(int argc, char **argv)
+{
+    map_width = 40, map_height = 20; 
+    game_width = map_width + 2, game_height = map_height + 2;
+    max_players = 2;
+}
+
 void set_locale()
 {
-    char *locale;
-    locale = setlocale(LC_ALL, "");
+    setlocale(LC_ALL, "");
 }
 
 void create_window()
@@ -86,14 +87,14 @@ void create_window()
 
     getmaxyx(ptr_window, screen_height, screen_width); 
 
-    if (screen_height < GAME_HEIGHT || screen_width < GAME_WIDTH) {
+    if (screen_height < game_height || screen_width < game_width) {
         restore_window();
-        printf(" - you need resize terminal to: cols %d rows %d", GAME_WIDTH, GAME_HEIGHT);
+        printf(" - you need resize terminal to: cols %d rows %d", game_width, game_height);
         printf("\n - current size: cols %d rows %d\n", screen_width, screen_height);
         exit(1);
     } 
 
-    wresize(ptr_window, GAME_HEIGHT, GAME_WIDTH);
+    wresize(ptr_window, game_height, game_width);
 
     // set no waiting for Enter key
     cbreak(); 
@@ -122,11 +123,11 @@ void create_window()
 
 void create_map()
 {
-    map = malloc(MAP_HEIGHT * MAP_WIDTH * sizeof(char *));
+    map = malloc(map_height * map_width * sizeof(char *));
 
-    for (int x = 0; x < MAP_WIDTH; x++) {
-        map[x] = malloc(MAP_HEIGHT * sizeof(char *));
-        for (int y = 0; y < MAP_HEIGHT; y++) {
+    for (int x = 0; x < map_width; x++) {
+        map[x] = malloc(map_height * sizeof(char *));
+        for (int y = 0; y < map_height; y++) {
             map[x][y] = EMPTY;
         }
     }
@@ -145,8 +146,8 @@ int **create_positions(int length)
 
     positions[1] = malloc(sizeof(int) * 3);
     positions[1][0] = LEFT;
-    positions[1][1] = MAP_WIDTH - 1;
-    positions[1][2] = MAP_HEIGHT - 3;
+    positions[1][1] = map_width - 1;
+    positions[1][2] = map_height - 3;
 
     return positions;
 }
@@ -189,8 +190,6 @@ void quit()
 void draw_char(int x, int y, char value)
 {
     if (value == WALL) {
-        /* mvaddch(y, x, ACS_CKBOARD); */
-        /* mvaddch(y, x, ACS_BOARD);  */
         mvaddch(y+1, x+1, ACS_BLOCK); 
     }
 }
@@ -221,12 +220,12 @@ void update_player_position(Moto *player)
 
 void check_player_collision(Moto *player)
 {
-    if (player->position.x < 0 || player->position.x >= MAP_WIDTH) game_over();
-    if (player->position.y < 0 || player->position.y >= MAP_HEIGHT) game_over();
+    if (player->position.x < 0 || player->position.x >= map_width) game_over();
+    if (player->position.y < 0 || player->position.y >= map_height) game_over();
     if (map[player->position.x][player->position.y] == WALL) game_over();
 }
 
-void draw_wall(Moto *player)
+void fulfill_wall(Moto *player)
 {
     map[player->position.x][player->position.y] = WALL;
 }
