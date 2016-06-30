@@ -5,9 +5,6 @@ Moto *ptr_player;
 Moto *ptr_ai;
 WINDOW *ptr_window;
 
-// players
-Moto player, ai; 
-
 // screen size
 int screen_height, screen_width;
 
@@ -54,7 +51,7 @@ void draw()
 {
     erase();
     draw_rectangle(0, 0, GAME_WIDTH-1, GAME_HEIGHT-1);
-    mvprintw(0, 0, "%dx%d | %dx%d", player.position.x, player.position.y, MAP_WIDTH, MAP_HEIGHT); 
+    mvprintw(0, 0, "%dx%d | %dx%d", ptr_player->position.x, ptr_player->position.y, MAP_WIDTH, MAP_HEIGHT); 
 
     for (int x = 0; x < MAP_WIDTH; x++) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -128,11 +125,8 @@ void create_players()
     ptr_player = malloc(sizeof(ptr_player));
     ptr_ai = malloc(sizeof(ptr_ai));
 
-    player = *ptr_player;
-    ai = *ptr_ai;
-
-    initialize_player(&player, RIGHT, 0, 3);
-    initialize_player(&ai, LEFT, MAP_WIDTH - 1, MAP_HEIGHT - 3);
+    initialize_player(ptr_player, RIGHT, 0, 3);
+    initialize_player(ptr_ai, LEFT, MAP_WIDTH - 1, MAP_HEIGHT - 3);
 }
 
 void initialize_player(Moto *player, int direction, int x, int y)
@@ -198,13 +192,13 @@ void check_player_collision(Moto *player)
 
 void update_player()
 {
-    input_player_direction(&player);
+    input_player_direction(ptr_player);
 
     // @todo - por no plural, atualizar os 2, pq eles fazem a mesma coisa
-    update_player_velocity(&player);
-    update_player_position(&player);
-    check_player_collision(&player);
-    draw_tail(&player);
+    update_player_velocity(ptr_player);
+    update_player_position(ptr_player);
+    check_player_collision(ptr_player);
+    draw_tail(ptr_player);
 }
 
 void draw_tail(Moto *player)
@@ -215,15 +209,15 @@ void draw_tail(Moto *player)
 void update_dumb_ai()
 {
     int try_new_direction = rand() % 10;
-    int *directions = get_allowed_directions(&ai);
-    if (try_new_direction == 8) ai.direction = directions[0]; 
-    if (try_new_direction == 9) ai.direction = directions[1]; 
+    int *directions = get_allowed_directions(ptr_ai);
+    if (try_new_direction == 8) ptr_ai->direction = directions[0]; 
+    if (try_new_direction == 9) ptr_ai->direction = directions[1]; 
 
     // @todo - por no plural, atualizar os 2, pq eles fazem a mesma coisa
-    update_player_velocity(&ai);
-    update_player_position(&ai);
-    check_player_collision(&ai);
-    draw_tail(&ai);
+    update_player_velocity(ptr_ai);
+    update_player_position(ptr_ai);
+    check_player_collision(ptr_ai);
+    draw_tail(ptr_ai);
 }
 
 int *get_allowed_directions(Moto *player)
