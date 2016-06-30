@@ -1,9 +1,9 @@
 #include "game.h"
 
 // pointers
-Moto * ptr_player;
-Moto * ptr_ai;
-WINDOW * ptr_window;
+Moto *ptr_player;
+Moto *ptr_ai;
+WINDOW *ptr_window;
 
 // players
 Moto player, ai; 
@@ -19,6 +19,8 @@ char **map;
 
 int main(int argc, char **argv)
 {
+    // initialize random seed
+    srand (time(NULL));
     set_locale(); 
     create_window();
     create_map();
@@ -45,13 +47,14 @@ void update()
     }
 
     update_player();
+    update_dumb_ai();
 } 
 
 void draw()
 {
     erase();
     draw_rectangle(0, 0, GAME_WIDTH-1, GAME_HEIGHT-1);
-    mvprintw(0, 0, "%dx%d | %dx%d", player.x, player.y, MAP_WIDTH, MAP_HEIGHT); 
+    mvprintw(0, 0, "%dx%d | %dx%d", player.position.x, player.position.y, MAP_WIDTH, MAP_HEIGHT); 
 
     for (int x = 0; x < MAP_WIDTH; x++) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -122,15 +125,23 @@ void create_map()
 
 void create_players()
 {
-    ptr_player = malloc(sizeof(player));
-    ptr_ai = malloc(sizeof(ai));
+    ptr_player = malloc(sizeof(ptr_player));
+    ptr_ai = malloc(sizeof(ptr_ai));
 
     player = *ptr_player;
     ai = *ptr_ai;
 
-    player.direction = RIGHT;
-    player.x = 0;
-    player.y = 0;
+    initialize_player(&player, RIGHT, 0, 3);
+    initialize_player(&ai, LEFT, MAP_WIDTH - 1, MAP_HEIGHT - 3);
+}
+
+void initialize_player(Moto *player, int direction, int x, int y)
+{
+    player->direction = direction;
+    player->position.x = x;
+    player->position.y = y;
+    player->velocity.x = 0;
+    player->velocity.y = 0;
 }
 
 void restore_window()
@@ -154,36 +165,83 @@ void draw_char(int x, int y, char value)
     }
 }
 
-void find_player_direction()
+void input_player_direction(Moto *player)
 {
-    if (keypress == KEY_LEFT) player.direction = LEFT;
-    if (keypress == KEY_RIGHT) player.direction = RIGHT;
-    if (keypress == KEY_UP) player.direction = UP;
-    if (keypress == KEY_DOWN) player.direction = DOWN;
+    if (keypress == KEY_LEFT) player->direction = LEFT;
+    if (keypress == KEY_RIGHT) player->direction = RIGHT;
+    if (keypress == KEY_UP) player->direction = UP;
+    if (keypress == KEY_DOWN) player->direction = DOWN;
 }
 
-void update_player_position()
+void update_player_velocity(Moto *player)
 {
-    if (player.direction == RIGHT) player.x += 1;
-    if (player.direction == LEFT) player.x -= 1;
-    if (player.direction == UP) player.y -= 1;
-    if (player.direction == DOWN) player.y += 1;
+    player->velocity.x = 0;
+    player->velocity.y = 0;
+    if (player->direction == RIGHT) player->velocity.x = +1;
+    if (player->direction == LEFT) player->velocity.x = -1;
+    if (player->direction == UP) player->velocity.y = -1;
+    if (player->direction == DOWN) player->velocity.y = +1;
 }
 
-void check_player_collision()
+void update_player_position(Moto *player)
 {
-    if (player.x < 0 || player.x >= MAP_WIDTH) game_over();
-    if (player.y < 0 || player.y >= MAP_HEIGHT) game_over();
-    if (map[player.x][player.y] == WALL) game_over();
+    player->position.x += player->velocity.x;
+    player->position.y += player->velocity.y;
+}
+
+void check_player_collision(Moto *player)
+{
+    if (player->position.x < 0 || player->position.x >= MAP_WIDTH) game_over();
+    if (player->position.y < 0 || player->position.y >= MAP_HEIGHT) game_over();
+    if (map[player->position.x][player->position.y] == WALL) game_over();
 }
 
 void update_player()
 {
-    find_player_direction();
-    update_player_position();
-    check_player_collision();
+    input_player_direction(&player);
 
-    map[player.x][player.y] = WALL;
+    // @todo - por no plural, atualizar os 2, pq eles fazem a mesma coisa
+    update_player_velocity(&player);
+    update_player_position(&player);
+    check_player_collision(&player);
+    draw_tail(&player);
+}
+
+void draw_tail(Moto *player)
+{
+    map[player->position.x][player->position.y] = WALL;
+}
+
+void update_dumb_ai()
+{
+    int try_new_direction = rand() % 10;
+    int *directions = get_allowed_directions(&ai);
+    if (try_new_direction == 8) ai.direction = directions[0]; 
+    if (try_new_direction == 9) ai.direction = directions[1]; 
+
+    // @todo - por no plural, atualizar os 2, pq eles fazem a mesma coisa
+    update_player_velocity(&ai);
+    update_player_position(&ai);
+    check_player_collision(&ai);
+    draw_tail(&ai);
+}
+
+int *get_allowed_directions(Moto *player)
+{
+    int *directions = malloc(sizeof(int) * 2);
+    switch(player->direction) {
+        case UP:
+        case DOWN:
+            directions[0] = RIGHT;
+            directions[1] = LEFT;
+        break;
+        case LEFT:
+        case RIGHT:
+            directions[0] = DOWN;
+            directions[1] = UP;
+        break;
+    }
+    return directions; 
 }
 
 void game_over()
@@ -194,6 +252,8 @@ void game_over()
 
 void draw_rectangle(int x, int y, int width, int height)
 {
+    box(ptr_window, 0, 0);
+    return;
     mvhline(y, x, 0, width-x);
     mvhline(height, x, 0, width-x);
     mvvline(y, x, 0, height-y);
