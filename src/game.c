@@ -1,8 +1,7 @@
 #include "game.h"
 
 // pointers
-Moto *ptr_player;
-Moto *ptr_ai;
+Moto **ptr_players;
 WINDOW *ptr_window;
 
 // screen size
@@ -13,6 +12,8 @@ int keypress;
 
 // 2d array
 char **map;
+
+int max_players = 2;
 
 int main(int argc, char **argv)
 {
@@ -43,15 +44,26 @@ void update()
         quit();
     }
 
-    update_player();
-    update_dumb_ai();
+    for (size_t i = 0; i < max_players; i++) {
+
+        if (i == 0) {
+            input_player_direction(ptr_players[i]);
+        } else {
+            update_dumb_ai(ptr_players[i]);
+        }
+
+        update_player_velocity(ptr_players[i]);
+        update_player_position(ptr_players[i]);
+        check_player_collision(ptr_players[i]);
+        draw_wall(ptr_players[i]);
+    }
 } 
 
 void draw()
 {
     erase();
     draw_rectangle(0, 0, GAME_WIDTH-1, GAME_HEIGHT-1);
-    mvprintw(0, 0, "%dx%d | %dx%d", ptr_player->position.x, ptr_player->position.y, MAP_WIDTH, MAP_HEIGHT); 
+    mvprintw(0, 0, "%dx%d | %dx%d", ptr_players[0]->position.x, ptr_players[0]->position.y, MAP_WIDTH, MAP_HEIGHT); 
 
     for (int x = 0; x < MAP_WIDTH; x++) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -120,22 +132,46 @@ void create_map()
     }
 } 
 
-void create_players()
+int **create_positions(int length)
 {
-    ptr_player = malloc(sizeof(ptr_player));
-    ptr_ai = malloc(sizeof(ptr_ai));
+    int **positions = malloc(sizeof(int) * length);
 
-    initialize_player(ptr_player, RIGHT, 0, 3);
-    initialize_player(ptr_ai, LEFT, MAP_WIDTH - 1, MAP_HEIGHT - 3);
+    // @todo usar for, criar aleatorimanete posicoes
+    /* for (size_t i = 0; i < length; i++) { } */
+    positions[0] = malloc(sizeof(int) * 3);
+    positions[0][0] = RIGHT;
+    positions[0][1] = 0;
+    positions[0][2] = 3;
+
+    positions[1] = malloc(sizeof(int) * 3);
+    positions[1][0] = LEFT;
+    positions[1][1] = MAP_WIDTH - 1;
+    positions[1][2] = MAP_HEIGHT - 3;
+
+    return positions;
 }
 
-void initialize_player(Moto *player, int direction, int x, int y)
+void create_players()
 {
+    ptr_players = malloc(sizeof(Moto) * max_players);
+    int **positions = create_positions(max_players);
+
+    for (size_t i = 0; i < max_players; i++) {
+        ptr_players[i] = new_player(positions[i][0], positions[i][1], positions[i][2]);
+    }
+}
+
+Moto *new_player(int direction, int x, int y)
+{
+    Moto *player = malloc(sizeof(Moto));
+
     player->direction = direction;
     player->position.x = x;
     player->position.y = y;
     player->velocity.x = 0;
     player->velocity.y = 0;
+
+    return player;
 }
 
 void restore_window()
@@ -190,34 +226,17 @@ void check_player_collision(Moto *player)
     if (map[player->position.x][player->position.y] == WALL) game_over();
 }
 
-void update_player()
-{
-    input_player_direction(ptr_player);
-
-    // @todo - por no plural, atualizar os 2, pq eles fazem a mesma coisa
-    update_player_velocity(ptr_player);
-    update_player_position(ptr_player);
-    check_player_collision(ptr_player);
-    draw_tail(ptr_player);
-}
-
-void draw_tail(Moto *player)
+void draw_wall(Moto *player)
 {
     map[player->position.x][player->position.y] = WALL;
 }
 
-void update_dumb_ai()
+void update_dumb_ai(Moto *ai)
 {
     int try_new_direction = rand() % 10;
-    int *directions = get_allowed_directions(ptr_ai);
-    if (try_new_direction == 8) ptr_ai->direction = directions[0]; 
-    if (try_new_direction == 9) ptr_ai->direction = directions[1]; 
-
-    // @todo - por no plural, atualizar os 2, pq eles fazem a mesma coisa
-    update_player_velocity(ptr_ai);
-    update_player_position(ptr_ai);
-    check_player_collision(ptr_ai);
-    draw_tail(ptr_ai);
+    int *directions = get_allowed_directions(ai);
+    if (try_new_direction == 8) ai->direction = directions[0]; 
+    if (try_new_direction == 9) ai->direction = directions[1]; 
 }
 
 int *get_allowed_directions(Moto *player)
