@@ -37,20 +37,6 @@ void start()
     current_state = PLAY;
 }
 
-void create_menu()
-{
-    current_state = MENU;
-    draw_rectangle(0, 0, game_width-1, game_height-1);
-    int center_x = game_width/2;
-    mvprintw(1, center_x - 14, " _____   ___    ___    _  _ ");
-    mvprintw(2, center_x - 14, "|_   _| | _ \\  / _ \\  | \\| |");
-    mvprintw(3, center_x - 14, "  | |   |   / | (_) | | .` |");
-    mvprintw(4, center_x - 14, "  |_|   |_|_\\  \\___/  |_|\\_|");
-    mvprintw(8, center_x-9, "PRESS 'Q' TO QUIT"); 
-    mvprintw(10, center_x-2, "OR"); 
-    mvprintw(12, center_x-11, "ENTER TO START/RESTART"); 
-}
-
 void tick()
 {
     do {
@@ -215,7 +201,7 @@ void quit()
 
 void draw_char(int x, int y, char value)
 {
-    if (value == WALL) mvaddch(y+1, x+1, ACS_BLOCK); 
+    if (value == WALL) mvaddch(y+1, x+1, '#'); 
 }
 
 void input_player_direction(Moto *player)
@@ -308,6 +294,20 @@ int *get_allowed_directions(Moto *player)
     return directions; 
 }
 
+void create_menu()
+{
+    current_state = MENU;
+    draw_rectangle(0, 0, game_width-1, game_height-1);
+    int center_x = game_width/2;
+    mvprintw(1, center_x - 14, " _____   ___    ___    _  _ ");
+    mvprintw(2, center_x - 14, "|_   _| | _ \\  / _ \\  | \\| |");
+    mvprintw(3, center_x - 14, "  | |   |   / | (_) | | .` |");
+    mvprintw(4, center_x - 14, "  |_|   |_|_\\  \\___/  |_|\\_|");
+    mvprintw(8, center_x-14, "PRESS ENTER TO START/RESTART"); 
+    mvprintw(10, center_x-2, "OR"); 
+    mvprintw(12, center_x-7, "'Q' TO QUIT"); 
+}
+
 void game_over(bool player_loses)
 {
     current_state = GAME_OVER;
@@ -321,14 +321,16 @@ void game_over(bool player_loses)
 
 void draw_rectangle(int x, int y, int width, int height)
 {
-    box(ptr_window, 0, 0);
-    return;
-    mvhline(y, x, 0, width-x);
-    mvhline(height, x, 0, width-x);
-    mvvline(y, x, 0, height-y);
-    mvvline(y, width, 0, height-y);
-    mvaddch(y, x, ACS_ULCORNER);
-    mvaddch(height, x, ACS_LLCORNER);
-    mvaddch(y, width, ACS_URCORNER);
-    mvaddch(height, width, ACS_LRCORNER);
+    for (size_t row = y; row < height; row++) {
+        mvaddch(row, x, '|');
+        mvaddch(row, width, '|');
+    }
+    for (size_t col = x; col < width; col++) {
+        mvaddch(0, col, '-');
+        mvaddch(height, col, '-');
+    }
+    mvaddch(y, x, '+');
+    mvaddch(height, x, '+');
+    mvaddch(y, width, '+');
+    mvaddch(height, width, '+');
 }
