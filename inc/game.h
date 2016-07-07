@@ -19,7 +19,15 @@ typedef struct {
     int direction;
 } Moto;
 
-enum {UP, DOWN, RIGHT, LEFT, WALL, EMPTY, GAME_OVER, PLAY, MENU};
+enum directions { UP, DOWN, RIGHT, LEFT };
+enum states { PLAY, GAME_OVER, MENU };
+enum draw { 
+    WALL = '#', 
+    EMPTY = ' ',
+    BOUND_CORNER = '+',    
+    BOUND_LINE_VERTICAL = '|',
+    BOUND_LINE_HORIZONTAL = '-'
+};
 
 #define SECOND 1000000
 #define FPS SECOND / 10
@@ -33,14 +41,14 @@ void set_locale();
 void create_window();
 void create_map();
 void create_players();
-Moto *new_player(int x, int y, int direction);
+Moto *new_player(int x, int y, enum directions direction);
 int **create_positions(int length);
 void restore_window();
 void quit();
 void draw_char(int y, int x, char value);
 void fulfill_wall(Moto *player);
 void update_player();
-void draw_rectangle(int x, int y, int width, int height);
+void create_bound(int x, int y, int width, int height);
 void input_player_direction(Moto *player);
 void update_player_position(Moto *player);
 void update_dumb_ai();

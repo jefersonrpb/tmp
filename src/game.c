@@ -16,7 +16,6 @@ int current_state;
 // sizes
 int screen_height, screen_width;
 int map_width, map_height; 
-int game_width, game_height;
 int max_players;
 
 int main(int argc, char **argv)
@@ -71,12 +70,13 @@ void update()
 
 void draw()
 {
-    if (current_state != PLAY) {
+    if (current_state == GAME_OVER) {
         return;
     }
-    erase();
-    draw_rectangle(0, 0, game_width-1, game_height-1);
-    /* mvprintw(0, 0, "%dx%d | %dx%d", ptr_players[0]->position->x, ptr_players[0]->position->y, map_width, map_height);  */
+    if (current_state == PLAY) {
+        erase();
+    }
+
     for (int x = 0; x < map_width; x++) {
         for (int y = 0; y < map_height; y++) {
             draw_char(x, y, map[x][y]);
@@ -87,8 +87,7 @@ void draw()
 
 void process_args(int argc, char **argv)
 {
-    map_width = 40, map_height = 20; 
-    game_width = map_width + 2, game_height = map_height + 2;
+    map_width = 42, map_height = 22; 
     max_players = 2;
 }
 
@@ -104,14 +103,14 @@ void create_window()
 
     getmaxyx(ptr_window, screen_height, screen_width); 
 
-    if (screen_height < game_height || screen_width < game_width) {
+    if (screen_height < map_height || screen_width < map_width) {
         restore_window();
-        printf(" - you need resize terminal to: cols %d rows %d", game_width, game_height);
+        printf(" - you need resize terminal to: cols %d rows %d", map_width, map_height);
         printf("\n - current size: cols %d rows %d\n", screen_width, screen_height);
         exit(1);
     } 
 
-    wresize(ptr_window, game_height, game_width);
+    wresize(ptr_window, map_height, map_width);
 
     // set no waiting for Enter key
     cbreak(); 
@@ -148,6 +147,7 @@ void create_map()
             map[x][y] = EMPTY;
         }
     }
+    create_bound(0, 0, map_width - 1, map_height - 1);
 } 
 
 int **create_positions(int length)
@@ -162,7 +162,7 @@ int **create_positions(int length)
     positions[0][2] = RIGHT;
 
     positions[1] = malloc(sizeof(int) * 3);
-    positions[1][0] = map_width - 1;
+    positions[1][0] = map_width - 2;
     positions[1][1] = map_height - 4;
     positions[1][2] = LEFT;
 
@@ -179,7 +179,7 @@ void create_players()
     }
 }
 
-Moto *new_player(int x, int y, int direction)
+Moto *new_player(int x, int y, enum directions direction)
 {
     Moto *player = malloc(sizeof(Moto));
     player->position = new_point(x, y);
@@ -201,7 +201,7 @@ void quit()
 
 void draw_char(int x, int y, char value)
 {
-    if (value == WALL) mvaddch(y+1, x+1, '#'); 
+    if (value != EMPTY) mvaddch(y, x, value); 
 }
 
 void input_player_direction(Moto *player)
@@ -245,16 +245,13 @@ Point *get_next_position(Point *current_position, int direction)
 
 bool check_collision(Point *position)
 {
-    if (position->x < 0 || position->x >= map_width) return true;
-    if (position->y < 0 || position->y >= map_height) return true;
-    if (map[position->x][position->y] == WALL) return true;
-    return false;
+    if (map[position->x][position->y] == EMPTY) return false;
+    return true;
 }
 
 void update_dumb_ai(Moto *ai)
 {
-    bool try_new_direction = rand() % 10 == 8;
-    if (try_new_direction) {
+    if (rand() % 10 == 8) {
         int *directions = get_allowed_directions(ai);
         ai->direction = rand() % 1 == 1 ? directions[0] : directions[1]; 
 
@@ -297,8 +294,9 @@ int *get_allowed_directions(Moto *player)
 void create_menu()
 {
     current_state = MENU;
-    draw_rectangle(0, 0, game_width-1, game_height-1);
-    int center_x = game_width/2;
+    create_map();
+    draw();
+    int center_x = map_width/2;
     mvprintw(1, center_x - 14, " _____   ___    ___    _  _ ");
     mvprintw(2, center_x - 14, "|_   _| | _ \\  / _ \\  | \\| |");
     mvprintw(3, center_x - 14, "  | |   |   / | (_) | | .` |");
@@ -319,18 +317,18 @@ void game_over(bool player_loses)
     mvprintw(0, x, "%s", text); 
 }
 
-void draw_rectangle(int x, int y, int width, int height)
+void create_bound(int x, int y, int width, int height)
 {
-    for (size_t row = y; row < height; row++) {
-        mvaddch(row, x, '|');
-        mvaddch(row, width, '|');
+    for (size_t _y = y; _y < height; _y++) {
+        map[x][_y] = BOUND_LINE_VERTICAL;
+        map[width][_y] = BOUND_LINE_VERTICAL;
     }
-    for (size_t col = x; col < width; col++) {
-        mvaddch(0, col, '-');
-        mvaddch(height, col, '-');
+    for (size_t _x = x; _x < width; _x++) {
+        map[_x][0] = BOUND_LINE_HORIZONTAL;
+        map[_x][height] = BOUND_LINE_HORIZONTAL;
     }
-    mvaddch(y, x, '+');
-    mvaddch(height, x, '+');
-    mvaddch(y, width, '+');
-    mvaddch(height, width, '+');
+    map[x][y] = BOUND_CORNER;
+    map[x][height] = BOUND_CORNER;
+    map[width][y] = BOUND_CORNER;
+    map[width][height] = BOUND_CORNER;
 }
