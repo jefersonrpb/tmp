@@ -1,3 +1,6 @@
+
+// https://github.com/a1k0n/tronbot/
+
 var FRAMEDELAY = 300;
 var p1ai = false;
 
