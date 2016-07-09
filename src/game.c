@@ -125,7 +125,7 @@ void create_window()
     use_default_colors();
     assume_default_colors(-1,-1);
     start_color();
-    init_pair(COLOR_WHITE, COLOR_WHITE, -1);
+    init_pair(COLOR_WHITE, COLOR_BLACK, COLOR_WHITE);
     init_pair(COLOR_BLUE, COLOR_BLUE, -1);
     init_pair(COLOR_RED, COLOR_RED, -1);
     init_pair(COLOR_GREEN, COLOR_GREEN, -1);
@@ -333,8 +333,10 @@ void game_over(bool player_loses)
     if (!player_loses) {
         text = " YOU WON ";
     }
-    int x = (map_width / 2) - 5;
+    int x = (map_width / 2) - strlen(text)/2;
+    attron(COLOR_PAIR(COLOR_WHITE));
     mvprintw(0, x, "%s", text); 
+    attroff(COLOR_PAIR(COLOR_WHITE));
 }
 
 void create_bound(int x, int y, int width, int height)
