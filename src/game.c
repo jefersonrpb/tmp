@@ -274,10 +274,8 @@ void check_collisions(Moto *player, bool is_ai)
 void update_dumb_ai(Moto *ai)
 {
     if (rand() % 10 == 9) {
-        
         int *directions = get_allowed_directions(ai);
         ai->direction = rand() % 1 == 1 ? directions[0] : directions[1]; 
-
         // new direction will collide, get adjacent
         if (check_collision(get_next_position(ai->position, ai->direction))) {
             ai->direction = ai->direction == directions[0] ? directions[1]: directions[0]; 
@@ -286,7 +284,6 @@ void update_dumb_ai(Moto *ai)
 
     // if will collide force new direction
     if (check_collision(get_next_position(ai->position, ai->direction))) {
-
         int *directions = get_allowed_directions(ai);
         ai->direction = directions[0];
         if (check_collision(get_next_position(ai->position, ai->direction))) {
