@@ -9,4 +9,4 @@ make
 bin/game
 ```
 
-![game preview](https://raw.githubusercontent.com/jefersonrpb/hunter.c/master/img/preview.jpg)-
+![game preview](https://raw.githubusercontent.com/jefersonrpb/hunter.c/master/img/preview.jpg)
