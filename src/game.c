@@ -273,6 +273,7 @@ void check_collisions(Moto *player, bool is_ai)
 
 void update_dumb_ai(Moto *ai)
 {
+    // try new direction
     if (rand() % 10 == 9) {
         int *directions = get_allowed_directions(ai);
         ai->direction = rand() % 1 == 1 ? directions[0] : directions[1]; 
