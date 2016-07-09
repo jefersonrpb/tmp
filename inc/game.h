@@ -17,6 +17,8 @@ typedef struct {
 typedef struct {
     Point *position;
     int direction;
+    int color;
+    bool dead;
 } Moto;
 
 enum directions { UP, DOWN, RIGHT, LEFT };
@@ -41,11 +43,11 @@ void set_locale();
 void create_window();
 void create_map();
 void create_players();
-Moto *new_player(int x, int y, enum directions direction);
+Moto *new_player(int x, int y, enum directions direction, int color);
 int **create_positions(int length);
 void restore_window();
 void quit();
-void draw_char(int y, int x, char value);
+void draw_char(int y, int x, int value);
 void fulfill_wall(Moto *player);
 void update_player();
 void create_bound(int x, int y, int width, int height);
@@ -54,6 +56,7 @@ void update_player_position(Moto *player);
 void update_dumb_ai();
 int *get_allowed_directions(Moto *player);
 bool check_collision(Point *position);
+void check_collisions(Moto *player, bool is_player);
 Point *get_next_position(Point *current_position, int direction);
 Point *new_point(int x, int y);
 void start();
