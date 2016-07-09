@@ -1,9 +1,5 @@
 #include "game.h"
 
-// pointers
-Moto **ptr_players;
-WINDOW *ptr_window;
-
 // 2d array
 int **map;
 
@@ -13,17 +9,20 @@ int keypress;
 // game state
 int current_state;
 
-// sizes
-int screen_height, screen_width;
-int map_width, map_height; 
-int max_players, remaining_players;
+// 40x40 + 2 cells for bounds
+int map_width = 42;
+int map_height = 22; 
+int max_players = 4;
+int remaining_players = 0;
+
+// pointers
+Moto **ptr_players;
+WINDOW *ptr_window;
 
 int main(int argc, char **argv)
 {
-    process_args(argc, argv);
     create_window();
     create_menu(); 
-    set_locale(); 
     srand(time(NULL));
     tick();
     return 0;
@@ -65,7 +64,7 @@ void update()
         if (i > 0) update_dumb_ai(ptr_players[i]);
         update_player_position(ptr_players[i]);
         check_collisions(ptr_players[i], i > 0);
-        fulfill_wall(ptr_players[i]);
+        fulfill(ptr_players[i]);
     }
 } 
 
@@ -81,22 +80,12 @@ void draw()
     refresh();
 }
 
-void process_args(int argc, char **argv)
-{
-    map_width = 42, map_height = 22; 
-    max_players = 4;
-}
-
-void set_locale()
-{
-    setlocale(LC_ALL, "");
-}
-
 void create_window()
 {
     // initialize window
     ptr_window = initscr(); 
 
+    int screen_height, screen_width;
     getmaxyx(ptr_window, screen_height, screen_width); 
 
     if (screen_height < map_height || screen_width < map_width) {
@@ -106,6 +95,7 @@ void create_window()
         exit(1);
     } 
 
+    // set screen size
     wresize(ptr_window, map_height, map_width);
 
     // set no waiting for Enter key
@@ -243,7 +233,7 @@ void update_player_position(Moto *player)
     player->position = get_next_position(player->position, player->direction);
 }
 
-void fulfill_wall(Moto *player)
+void fulfill(Moto *player)
 {
     map[player->position->x][player->position->y] = WALL | COLOR_PAIR(player->color);
 }
