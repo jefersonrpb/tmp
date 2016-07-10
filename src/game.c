@@ -47,7 +47,7 @@ void tick()
 void update()
 {
     keypress = getch();
-    if (keypress == 'q') {
+    if (keypress == 'q' || keypress == 'Q') {
         quit();
     }
 
@@ -298,7 +298,7 @@ void create_menu()
     mvprintw(2, center_x - 14, "|_   _| | _ \\  / _ \\  | \\| |");
     mvprintw(3, center_x - 14, "  | |   |   / | (_) | | .` |");
     mvprintw(4, center_x - 14, "  |_|   |_|_\\  \\___/  |_|\\_|");
-    mvprintw(8, center_x-14, "PRESS ENTER TO START/RESTART"); 
+    mvprintw(8, center_x-14, "PRESS 'ENTER' TO START/RESTART"); 
     mvprintw(10, center_x-2, "OR"); 
     mvprintw(12, center_x-7, "'Q' TO QUIT"); 
 }
