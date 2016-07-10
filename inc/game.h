@@ -56,7 +56,6 @@ Moto *new_player(int x, int y, enum directions direction, int color);
 Point *new_point(int x, int y);
 Point *get_next_position(Point *current_position, int direction);
 bool check_collision(Point *position);
-int **create_positions(int length);
 int *get_allowed_directions(Moto *player);
 
 #endif //GAME_INCLUDED

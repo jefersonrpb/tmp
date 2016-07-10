@@ -125,6 +125,7 @@ void create_window()
     use_default_colors();
     assume_default_colors(-1,-1);
     start_color();
+
     init_pair(COLOR_WHITE, COLOR_BLACK, COLOR_WHITE);
     init_pair(COLOR_BLUE, COLOR_BLUE, -1);
     init_pair(COLOR_RED, COLOR_RED, -1);
@@ -144,46 +145,22 @@ void create_map()
     create_bound(0, 0, map_width - 1, map_height - 1);
 } 
 
-int **create_positions(int length)
-{
-    int **positions = malloc(sizeof(int) * length);
-
-    // top left
-    positions[0] = malloc(sizeof(int) * 4);
-    positions[0][0] = 1;
-    positions[0][1] = 3;
-    positions[0][2] = RIGHT;
-    positions[0][3] = COLOR_BLUE;
-
-    // bottom right
-    positions[1] = malloc(sizeof(int) * 4);
-    positions[1][0] = map_width - 2;
-    positions[1][1] = map_height - 4;
-    positions[1][2] = LEFT;
-    positions[1][3] = COLOR_RED;
-
-    // top right
-    positions[2] = malloc(sizeof(int) * 4);
-    positions[2][0] = map_width - 2;
-    positions[2][1] = 3;
-    positions[2][2] = LEFT;
-    positions[2][3] = COLOR_GREEN;
-
-    // bottom left
-    positions[3] = malloc(sizeof(int) * 4);
-    positions[3][0] = 1;
-    positions[3][1] = map_height - 4;
-    positions[3][2] = RIGHT;
-    positions[3][3] = COLOR_YELLOW;
-
-    return positions;
-}
-
 void create_players()
 {
     ptr_players = malloc(sizeof(Moto) * max_players);
-    int **positions = create_positions(max_players);
     remaining_players = max_players;
+
+    // 2d array with x, y, direction, color
+    int positions[4][4] = {
+        // top left
+        {1, 3, RIGHT, COLOR_BLUE},
+        // bottom right
+        {map_width - 2, map_height - 4, LEFT, COLOR_RED},
+        // top right
+        {map_width - 2, 3, LEFT, COLOR_GREEN},
+        // bottom left
+        {1, map_height - 4, RIGHT, COLOR_YELLOW}
+    };
 
     for (int i = 0; i < max_players; i++) {
         ptr_players[i] = new_player(positions[i][0], positions[i][1], positions[i][2], positions[i][3]);
