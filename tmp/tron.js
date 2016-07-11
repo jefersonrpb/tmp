@@ -1,5 +1,6 @@
 
 // https://github.com/a1k0n/tronbot/
+// https://github.com/samirotiv/Tron/blob/master/ai.c
 
 var FRAMEDELAY = 300;
 var p1ai = false;
@@ -33,8 +34,8 @@ window.onload = function() {
         var y = 0|(Math.random()*(h-4)) + 2;
         var walklen = Math.random()*15;
         for(var k=0;k<walklen;k++) {
-            addWall(x,y);
-            addWall(w-1-x,h-1-y);
+            // addWall(x,y);
+            // addWall(w-1-x,h-1-y);
             var move = 0|(Math.random()*4);
             switch(move) {
                 case 0: x++; break;
@@ -52,7 +53,10 @@ window.onload = function() {
     var p2move = 0;
     var dx = [-1,0,1,0];
     var dy = [0,-1,0,1];
-    var di = [-1,-w,1,w];
+
+    // directions: 0:west [<], 1:north [^], 2:est[>] 3:south[v]  
+    var di = [-1,-w,1,w]; 
+
     var p1x = 1,
         p1y = h-2;
     var p2x = w-2,
@@ -137,6 +141,7 @@ window.onload = function() {
     // negamax -- minimax with alpha-beta pruning, simple implementation (see wikipedia)
     function negamax(myi,theiri,depth,a,b)
     {
+        // returna o score baseado no territorios que a AI conquistara antes do jogador1
         if(depth == 0) {
             return evaluate_pos(myi,theiri);
         }
@@ -145,6 +150,9 @@ window.onload = function() {
         for(var move=0;move<4;move++) {
             var idx = myi+di[move];
             if(map[idx]) continue;
+
+            // como nao esta preenchido anteriormente, apenas preenche para proxima iteracao nao entrar
+            // depois da recursao sera limpo(=undefined)
             map[idx] = 1;
             // recurse
             var _p1 = p1dist; // p[12]dist, p[12]score are the predicted distance tables and scores; they're kept here only for debugging
@@ -187,6 +195,7 @@ window.onload = function() {
             }
         }
 
+        // os primeiros argumentos sao as posicoes iniciasis dos jogaradores em 2d array 
         var score = negamax(p2x+w*p2y,p1x+w*p1y,6,-1e6,1e6); // side effect of negamax() is to set p2move
 
         p1x += dx[p1move]; p1y += dy[p1move];
