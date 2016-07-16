@@ -54,7 +54,7 @@ window.onload = function() {
     var dx = [-1,0,1,0];
     var dy = [0,-1,0,1];
 
-    // directions: 0:west [<], 1:north [^], 2:est[>] 3:south[v]  
+    // directions: 0:west [<], 1:north [^], 2:east[>] 3:south[v]  
     var di = [-1,-w,1,w]; 
 
     var p1x = 1,
