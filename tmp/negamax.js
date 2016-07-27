@@ -28,7 +28,7 @@
         }
     }
 
-    var player = new Player(1, mapLength-2, 2, '#00f');
+    var player = new Player(1, mapLength-2, 2, '#333');
     player.draw();
 
     // create and draw boundaries
@@ -80,7 +80,7 @@
     function addWall(x, y) 
     {
         map[getID(x, y)] = mapTypes.wall;
-        drawCell(x, y, '#000');
+        drawCell(x, y, '#191919');
     }
 
     function drawCell(x, y, color) 
