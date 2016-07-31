@@ -75,6 +75,10 @@
     canvas.addEventListener('click', function() {
     })
 
+    // criar cache dos distMap
+    // - com 2 jogadores, eh executado floodfill 4x, sendo que seria preciso 2x(1 pra cada jogador)
+    // o id do cache poderia ser o "tick" atual mais o id do player
+    //                                \_ um sequencial para cada iteracao
     function floodfill(distMap, id)
     {
         var q = [id], q2 = [];
@@ -140,11 +144,10 @@
         }
     }
 
-    function negamax(alphaPosition, betaPosition, depth, alpha, beta, currentMove)
+    function negamax(alphaPosition, betaPosition, depth, alpha, beta, bestMove)
     {
         if (depth == 0) return evaluatePosition(alphaPosition, betaPosition);
 
-        var bestMove = undefined;
         for (var move = 0; move < 4; move++) {
             // proxima posicao
             var id = alphaPosition + mapMoves[move];
@@ -162,11 +165,8 @@
                 if (alpha >= beta) break;
             }
         }
-        if (depth == 6) {
-            if (bestMove === undefined) return currentMove;
-            return bestMove;
-        }
 
+        if (depth == 6) return bestMove;
         return alpha;
     }
 
@@ -177,7 +177,7 @@
 
     function tick()
     {
-        // player.move = negamax(player.pos(), ai.pos(), 6, -1e6, 1e6, player.move);
+        player.move = negamax(player.pos(), ai.pos(), 6, -1e6, 1e6, player.move);
         player.update();
         player.draw();
 
