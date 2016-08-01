@@ -72,8 +72,6 @@
     tick();
 
     console.log('player, ai, moves', player.move, ai.move);
-    canvas.addEventListener('click', function() {
-    })
 
     // criar cache dos distMap
     // - com 2 jogadores, eh executado floodfill 4x, sendo que seria preciso 2x(1 pra cada jogador)
