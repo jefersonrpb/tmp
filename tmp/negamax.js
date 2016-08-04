@@ -69,6 +69,12 @@
     // ai.update();
     ai.draw();
 
+    window.iterations = {
+        negamax: 0,
+        floodfill: 0,
+        evaluatePosition: 0,
+    };
+
     tick();
 
     console.log('player, ai, moves', player.move, ai.move);
@@ -79,6 +85,7 @@
     //                                \_ um sequencial para cada iteracao
     function floodfill(distMap, id)
     {
+        window.iterations.floodfill++;
         var q = [id], q2 = [];
         distMap[id] = 1;
         var dist = 1;
@@ -103,6 +110,7 @@
 
     function evaluatePosition(alphaPosition, betaPosition) 
     {
+        window.iterations.evaluatePosition++;
         var score = 0;
 
         var alphaDistMap = floodfill([], alphaPosition);
@@ -111,6 +119,7 @@
         // drawDistMap(alphaDistMap, 'blue');
         // drawDistMap(betaDistMap, 'red');
 
+        // first and last rows are walls
         for(var i = mapLength + 1; i < mapLength * (mapLength - 1) - 1; i++) {
             //wall
             if(map[i]) continue; 
@@ -144,6 +153,7 @@
 
     function negamax(alphaPosition, betaPosition, depth, alpha, beta, bestMove)
     {
+        window.iterations.negamax++;
         if (depth == 0) return evaluatePosition(alphaPosition, betaPosition);
 
         for (var move = 0; move < 4; move++) {
@@ -175,6 +185,18 @@
 
     function tick()
     {
+        console.clear();
+        console.log('player, ai, moves', player.move, ai.move);
+        console.log('negamax: ', window.iterations.negamax);
+        console.log('floodfill: ', window.iterations.floodfill);
+        console.log('evaluatePosition: ', window.iterations.evaluatePosition);
+
+        window.iterations = {
+            negamax: 0,
+            floodfill: 0,
+            evaluatePosition: 0,
+        };
+
         player.move = negamax(player.pos(), ai.pos(), 6, -1e6, 1e6, player.move);
         player.update();
         player.draw();
@@ -183,9 +205,8 @@
         ai.update();
         ai.draw();
 
-        console.log('player, ai, moves', player.move, ai.move);
-
-        setTimeout(tick, 300);
+        if (!player.alive && !ai.alive) return false;
+        setTimeout(tick, 1000);
     }
 
     function Player(x, y, id, move, color)
@@ -195,7 +216,7 @@
         this.id = id;
         this.move = move;
         this.color = color;
-        this.die = false;
+        this.alive = true;
         this.pos = function() {
             return getID(this.x, this.y);
         }
@@ -203,11 +224,11 @@
             drawCell(this.x, this.y, this.color);
         }
         this.update = function() {
-            if (this.move == moves.idle || this.die) return false;
+            if (this.move == moves.idle || !this.alive) return false;
             var x = this.x + mapMovesX[this.move]; 
             var y = this.y + mapMovesY[this.move]; 
             if (map[getID(x, y)]) {
-                this.die = true;
+                this.alive = false;
                 console.error('gameover', this.id);
                 return false;
             }
@@ -222,6 +243,15 @@
     function getID(x, y)
     {
         return x + y * mapLength;
+    }
+
+    // get 2D position of 1D value
+    function getXY(id)
+    {
+        return {
+            x: id % mapLength,
+            y: Math.floor(id/mapLength),
+        }
     }
 
     function addWall(x, y) 
@@ -257,7 +287,7 @@
     function registreKeyboard(player)
     {
         window.addEventListener('keydown', function(event) {
-            if (player.die) return;
+            if (player.alive) return;
             switch(event.keyCode) {
 
                 case 37: // left
@@ -299,4 +329,3 @@
     }
 
 })();
-
