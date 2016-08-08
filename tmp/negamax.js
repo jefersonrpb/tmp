@@ -73,6 +73,7 @@
         negamax: 0,
         floodfill: 0,
         evaluatePosition: 0,
+        bestScore: [],
     };
 
     tick();
@@ -141,6 +142,53 @@
         return score;
     }
 
+    function evaluatePositions(positions, playerIndex) 
+    {
+        window.iterations.evaluatePosition++;
+
+        var distMaps = [];
+        var scores = [];
+        for (var indexPosition = 0; indexPosition < positions.length; indexPosition++) {
+            distMaps[indexPosition] = floodfill([], positions[indexPosition]);
+            scores[indexPosition] = 0;
+        }
+
+        for (var indexPosition = 0; indexPosition < positions.length; indexPosition++) {
+
+            if (indexPosition == playerIndex) continue;
+
+            // ignroe first and last rows, are walls
+            for(var i = mapLength + 1; i < mapLength * (mapLength - 1) - 1; i++) {
+
+                //wall
+                if(map[i]) continue; 
+
+                if (distMaps[playerIndex][i] && distMaps[indexPosition][i]) {
+                    var diff = distMaps[playerIndex][i] - distMaps[indexPosition][i];
+                    if (diff < 0) {
+                        scores[playerIndex]++;
+                        scores[indexPosition]--;
+                    } else {
+                        scores[playerIndex]--;
+                        scores[indexPosition]++;
+                    }
+                    continue;
+                }
+
+                if (distMaps[playerIndex][i]) {
+                    scores[playerIndex]++;
+                    scores[indexPosition]--;
+                }
+                if (distMaps[indexPosition][i]) {
+                    scores[playerIndex]--;
+                    scores[indexPosition]++;
+                }
+            }
+        }
+
+        return scores;
+    }
+
     function drawDistMap(map, color)
     {
         for (var i = 0; i < map.length; i++) {
@@ -178,6 +226,43 @@
         return alpha;
     }
 
+    // https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
+    // http://web.cs.du.edu/~sturtevant/papers/multiplayergamesthesis.pdf
+    function maxn(positions, depth, playerIndex, bestMove)
+    {
+        window.iterations.negamax++;
+
+        // clone
+        var positions = positions.slice();
+
+        if (depth == 0) return evaluatePositions(positions, playerIndex);
+
+        var nextPlayerIndex = (playerIndex + 1)  % 2;
+        var bestScore = [-Infinity, -Infinity];
+
+        for (var move = 0; move < 4; move++) {
+
+            var indexPosition = playerIndex;
+            positions[indexPosition] += mapMoves[move];
+
+            if (map[positions[indexPosition]]) continue;
+
+            // just for evaluate
+            map[positions[indexPosition]] = mapTypes.wall;
+            var scores = maxn(positions, depth - 1, nextPlayerIndex);
+            map[positions[indexPosition]] = mapTypes.empty;
+
+            if (scores[playerIndex] > bestScore[playerIndex]) {
+                bestScore = scores;
+                bestMove = move;
+            }
+        }
+
+        if (depth == 6) window.iterations.bestScore = bestScore;
+        if (depth == 6) return bestMove;
+        return bestScore;
+    }
+
     function clear()
     {
         context.clearRect(0, 0, canvas.width, canvas.height); 
@@ -185,23 +270,27 @@
 
     function tick()
     {
-        console.clear();
+        // console.clear();
         console.log('player, ai, moves', player.move, ai.move);
         console.log('negamax: ', window.iterations.negamax);
         console.log('floodfill: ', window.iterations.floodfill);
         console.log('evaluatePosition: ', window.iterations.evaluatePosition);
+        console.log('bestScore: ', window.iterations.bestScore);
 
         window.iterations = {
             negamax: 0,
             floodfill: 0,
             evaluatePosition: 0,
+            bestScore: [],
         };
 
-        player.move = negamax(player.pos(), ai.pos(), 6, -1e6, 1e6, player.move);
+        // player.move = negamax(player.pos(), ai.pos(), 6, -1e6, 1e6, player.move);
+        player.move = maxn([player.pos(), ai.pos()], 6, 0, player.move);
         player.update();
         player.draw();
 
-        ai.move = negamax(ai.pos(), player.pos(), 6, -1e6, 1e6, ai.move);
+        // ai.move = negamax(ai.pos(), player.pos(), 6, -1e6, 1e6, ai.move);
+        ai.move = maxn([player.pos(), ai.pos()], 6, 1, ai.move);
         ai.update();
         ai.draw();
 
