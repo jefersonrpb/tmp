@@ -24,7 +24,7 @@
     const moves = {idle: 4, west: 0, north: 1, east: 2, south: 3};
     const mapMovesX = [-1, 0, 1, 0];
     const mapMovesY = [0, -1, 0, 1];
-    const mapTypes = {wall: 1, empty: 0};
+    const mapTypes = {wall: 1, empty: 0, fakeWall: 2};
 
     // create canvas and get context
     var canvas = createCanvas(mapSize, mapSize);
@@ -57,13 +57,14 @@
         ctx.stroke();
     }
 
-    var MAX_PLAYERS = 2;
-    var MAXN_DEPTH = 6;//mapLength * 3;
+    var MAX_PLAYERS = 4;
+    var MAXN_DEPTH = 8;//mapLength * 3;
 
     var players = [];
+    var _bestScore = [];
     var startPositions = [
-        {x: 1, y: mapLength-2, move: moves.east, color: '#333'},
-        {x: mapLength-2, y: 1, move: moves.west, color: '#999'},
+        {x: 1, y: mapLength-2, move: moves.east, color: 'blue'},
+        {x: mapLength-2, y: 1, move: moves.west, color: 'red'},
         {x: 1, y: 1, move: moves.east, color: 'green'},
         {x: mapLength-2, y: mapLength-2, move: moves.west, color: 'yellow'},
     ]
@@ -71,30 +72,21 @@
         var curr = startPositions[playerIndex];
         players[playerIndex] = new Player(curr.x, curr.y, 'player'+(playerIndex+1), curr.move, curr.color);
         players[playerIndex].draw();
+
+        _bestScore.push(-Infinity);
     }
 
-    // registreKeyboard(player1);
+    registreKeyboard(players[0]);
     window.map = map;
 
-    window.iterations = {
-        negamax: 0,
-        floodfill: 0,
-        evaluatePosition: 0,
-    };
+    tick();
 
-    // tick();
+    // window.addEventListener('click', function() {
+        // tick();
+    // })
 
-    window.addEventListener('click', function() {
-        tick();
-    })
-
-    // criar cache dos distMap
-    // - com 2 jogadores, eh executado floodfill 4x, sendo que seria preciso 2x(1 pra cada jogador)
-    // o id do cache poderia ser o "tick" atual mais o id|pos do player
-    //                                \_ um sequencial para cada iteracao
     function floodfill(distMap, id)
     {
-        window.iterations.floodfill++;
         var q = [id], q2 = [];
         distMap[id] = 1;
         var dist = 1;
@@ -119,7 +111,6 @@
 
     function evaluatePosition(alphaPosition, betaPosition) 
     {
-        window.iterations.evaluatePosition++;
         var score = 0;
 
         var alphaDistMap = floodfill([], alphaPosition);
@@ -152,8 +143,6 @@
 
     function evaluatePositions(positions, playerIndex) 
     {
-        window.iterations.evaluatePosition++;
-
         var distMaps = [];
         var scores = [];
         for (var indexPosition = 0; indexPosition < positions.length; indexPosition++) {
@@ -175,21 +164,21 @@
                     var diff = distMaps[playerIndex][i] - distMaps[indexPosition][i];
                     if (diff < 0) {
                         scores[playerIndex]++;
-                        scores[indexPosition]--;
+                        // scores[indexPosition]--;
                     } else {
-                        scores[playerIndex]--;
-                        scores[indexPosition]++;
+                        // scores[playerIndex]--;
+                        // scores[indexPosition]++;
                     }
                     continue;
                 }
 
                 if (distMaps[playerIndex][i]) {
-                    scores[playerIndex]++;
-                    scores[indexPosition]--;
+                    scores[playerIndex] += 1;
+                    // scores[indexPosition] -= 1;
                 }
                 if (distMaps[indexPosition][i]) {
-                    scores[playerIndex]--;
-                    scores[indexPosition]++;
+                    // scores[playerIndex] -= 1;
+                    // scores[indexPosition] += 1;
                 }
             }
         }
@@ -209,7 +198,6 @@
 
     function negamax(alphaPosition, betaPosition, depth, alpha, beta, bestMove)
     {
-        window.iterations.negamax++;
         if (depth == 0) return evaluatePosition(alphaPosition, betaPosition);
 
         for (var move = 0; move < 4; move++) {
@@ -233,17 +221,51 @@
         if (depth == 6) return bestMove;
         return alpha;
     }
+    var _debugPos = [
+        [],[],[],[]
+    ];
+
+    function debugPos(id, playerIndex, score)
+    {
+        var pos = getXY(id);
+        _debugPos[playerIndex].push({pos: pos, score: score});
+        // drawCell(pos.x, pos.y, '#333', score == -Infinity ? '0': score);
+    }
+
+    function drawDebugPos(playerIndex)
+    {
+        for (var i = 0; i < _debugPos[playerIndex].length; i++) {
+            var curr = _debugPos[playerIndex][i];
+            var pos = curr.pos;
+            var score = curr.score;
+            if (typeof map[getID(pos.x, pos.y)] != 'string') {
+                drawCell(pos.x, pos.y, '#333', score == -Infinity ? '0': score);
+            } else {
+                drawCell(pos.x, pos.y, startPositions[playerIndex].color, score == -Infinity ? '0': score);
+            }
+        }
+    }
+
+    function clearDebugPos(playerIndex)
+    {
+        if (!_debugPos[playerIndex]) return _debugPos[playerIndex] = [];
+        for (var i = 0; i < _debugPos[playerIndex].length; i++) {
+            var pos = _debugPos[playerIndex][i];
+            // if (typeof map[getID(pos.x, pos.y)] != 'string') {
+                clearCell(pos.x, pos.y);
+            // }
+        }
+        _debugPos[playerIndex] = []; 
+    }
 
     // https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
     // http://web.cs.du.edu/~sturtevant/papers/multiplayergamesthesis.pdf
     function maxn(positions, depth, playerIndex, bestMove)
     {
-        window.iterations.negamax++;
-
         if (depth == 0) return evaluatePositions(positions, playerIndex);
 
         var nextPlayerIndex = (playerIndex + 1)  % MAX_PLAYERS;
-        var bestScore = [-Infinity, -Infinity];
+        var bestScore = _bestScore.slice();
 
         for (var move = 0; move < 4; move++) {
 
@@ -255,18 +277,21 @@
                 continue;
             }
 
-            // var pos = getXY(_positions[playerIndex]);
-            // drawCell(pos.x, pos.y, 'red', map[_positions[playerIndex]]);
-
             // just for evaluate
-            map[_positions[playerIndex]] = mapTypes.wall;
-            var scores = maxn(_positions, depth - 1, nextPlayerIndex);
+            map[_positions[playerIndex]] = mapTypes.fakeWall;
+            var scores = maxn(_positions.slice(), depth - 1, nextPlayerIndex);
             map[_positions[playerIndex]] = mapTypes.empty;
+
+            if (scores[playerIndex] < 0) {
+                scores[playerIndex] = 1;
+            }
 
             if (scores[playerIndex] > bestScore[playerIndex]) {
                 bestScore = scores;
                 bestMove = move;
             }
+
+            // debugPos(_positions[playerIndex], playerIndex, bestScore[playerIndex]); 
         }
 
         if (depth == MAXN_DEPTH) return bestMove;
@@ -280,19 +305,21 @@
 
     function tick()
     {
-        var positions = [];
         for (var playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex++) {
-            positions.push(players[playerIndex].pos());
-        }
 
-        console.log('tick', positions);
-
-        for (var playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex++) {
+            var positions = [];
+            for (var _playerIndex = 0; _playerIndex < MAX_PLAYERS; _playerIndex++) {
+                positions.push(players[_playerIndex].pos());
+            }
 
             var player = players[playerIndex];
-            player.move = maxn(positions, MAXN_DEPTH, playerIndex, player.move);
+            if (playerIndex > 0) {
+                player.move = maxn(positions, MAXN_DEPTH, playerIndex, player.move);
+            }
             player.update();
             player.draw();
+
+            // drawDebugPos(playerIndex);
         }
         
         var alive = 0;
@@ -301,29 +328,7 @@
         }
         if (alive == 0) return false;
 
-        // player1.move = negamax(player1.pos(), player2.pos(), 6, -1e6, 1e6, player1.move);
-        // player1.move = maxn([player1.pos(), player2.pos()], MAXN_DEPTH, 0, player1.move);
-        // player1.update();
-        // player1.draw();
-
-        // player2.move = negamax(player2.pos(), player1.pos(), 6, -1e6, 1e6, player2.move);
-        // player2.move = maxn([player1.pos(), player2.pos()], MAXN_DEPTH, 1, player2.move);
-        // player2.update();
-        // player2.draw();
-
-        // setTimeout(tick, 1000);
-
-        // console.clear();
-        console.log('negamax: ', window.iterations.negamax);
-        console.log('floodfill: ', window.iterations.floodfill);
-        console.log('evaluatePosition: ', window.iterations.evaluatePosition);
-
-        window.iterations = {
-            negamax: 0,
-            floodfill: 0,
-            evaluatePosition: 0,
-        };
-
+        setTimeout(tick, 300);
     }
 
     function Player(x, y, id, move, color)
@@ -377,7 +382,7 @@
         drawCell(x, y, '#191919');
     }
 
-    function drawCell(x, y, color, value) 
+    function clearCell(x, y)
     {
         var x = x * blockSize;
         var y = y * blockSize;
@@ -385,6 +390,16 @@
         var height = blockSize - blockMargin;
 
         ctx.clearRect(x, y, width, height); 
+    }
+
+    function drawCell(x, y, color, value) 
+    {
+        var x = x * blockSize;
+        var y = y * blockSize;
+        var width = blockSize - blockMargin;
+        var height = blockSize - blockMargin;
+
+        clearCell(x, y); 
 
         ctx.fillStyle = color || '#000';
         ctx.fillRect(x, y, width, height);
@@ -404,7 +419,7 @@
     function registreKeyboard(player)
     {
         window.addEventListener('keydown', function(event) {
-            if (player.alive) return;
+            if (!player.alive) return;
             switch(event.keyCode) {
 
                 case 37: // left
