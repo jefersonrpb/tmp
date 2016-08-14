@@ -57,19 +57,24 @@
         ctx.stroke();
     }
 
-    var MAXN_DEPTH = mapLength * 3;
+    var MAX_PLAYERS = 2;
+    var MAXN_DEPTH = 6;//mapLength * 3;
 
-    var player = new Player(1, mapLength-2, 'player', moves.east, '#333');
-    // player.update();
-    player.draw();
+    var players = [];
+    var startPositions = [
+        {x: 1, y: mapLength-2, move: moves.east, color: '#333'},
+        {x: mapLength-2, y: 1, move: moves.west, color: '#999'},
+        {x: 1, y: 1, move: moves.east, color: 'green'},
+        {x: mapLength-2, y: mapLength-2, move: moves.west, color: 'yellow'},
+    ]
+    for (var playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex++) {
+        var curr = startPositions[playerIndex];
+        players[playerIndex] = new Player(curr.x, curr.y, 'player'+(playerIndex+1), curr.move, curr.color);
+        players[playerIndex].draw();
+    }
 
-    registreKeyboard(player);
-
+    // registreKeyboard(player1);
     window.map = map;
-
-    var ai = new Player(mapLength-2, 1, 'ai', moves.west, '#999');
-    // ai.update();
-    ai.draw();
 
     window.iterations = {
         negamax: 0,
@@ -77,13 +82,11 @@
         evaluatePosition: 0,
     };
 
-    tick();
+    // tick();
 
     window.addEventListener('click', function() {
         tick();
     })
-
-    console.log('player, ai, moves', player.move, ai.move);
 
     // criar cache dos distMap
     // - com 2 jogadores, eh executado floodfill 4x, sendo que seria preciso 2x(1 pra cada jogador)
@@ -172,9 +175,9 @@
                     var diff = distMaps[playerIndex][i] - distMaps[indexPosition][i];
                     if (diff < 0) {
                         scores[playerIndex]++;
-                        // scores[indexPosition]--;
+                        scores[indexPosition]--;
                     } else {
-                        // scores[playerIndex]--;
+                        scores[playerIndex]--;
                         scores[indexPosition]++;
                     }
                     continue;
@@ -182,10 +185,10 @@
 
                 if (distMaps[playerIndex][i]) {
                     scores[playerIndex]++;
-                    // scores[indexPosition]--;
+                    scores[indexPosition]--;
                 }
                 if (distMaps[indexPosition][i]) {
-                    // scores[playerIndex]--;
+                    scores[playerIndex]--;
                     scores[indexPosition]++;
                 }
             }
@@ -237,34 +240,34 @@
     {
         window.iterations.negamax++;
 
-        // clone
-        var positions = positions.slice();
-
         if (depth == 0) return evaluatePositions(positions, playerIndex);
 
-        var nextPlayerIndex = (playerIndex + 1)  % 2;
-        var bestScore = [0, 0];
+        var nextPlayerIndex = (playerIndex + 1)  % MAX_PLAYERS;
+        var bestScore = [-Infinity, -Infinity];
 
-        console.group('it: '+ depth);
         for (var move = 0; move < 4; move++) {
 
-            positions[playerIndex] += mapMoves[move];
+            // clone
+            var _positions = positions.slice();
+            _positions[playerIndex] += mapMoves[move];
 
-            if (map[positions[playerIndex]]) {
+            if (map[_positions[playerIndex]]) {
                 continue;
             }
 
+            // var pos = getXY(_positions[playerIndex]);
+            // drawCell(pos.x, pos.y, 'red', map[_positions[playerIndex]]);
+
             // just for evaluate
-            map[positions[playerIndex]] = mapTypes.wall;
-            var scores = maxn(positions, depth - 1, nextPlayerIndex);
-            map[positions[playerIndex]] = mapTypes.empty;
+            map[_positions[playerIndex]] = mapTypes.wall;
+            var scores = maxn(_positions, depth - 1, nextPlayerIndex);
+            map[_positions[playerIndex]] = mapTypes.empty;
 
             if (scores[playerIndex] > bestScore[playerIndex]) {
                 bestScore = scores;
                 bestMove = move;
             }
         }
-        console.groupEnd();
 
         if (depth == MAXN_DEPTH) return bestMove;
         return bestScore;
@@ -277,8 +280,40 @@
 
     function tick()
     {
+        var positions = [];
+        for (var playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex++) {
+            positions.push(players[playerIndex].pos());
+        }
+
+        console.log('tick', positions);
+
+        for (var playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex++) {
+
+            var player = players[playerIndex];
+            player.move = maxn(positions, MAXN_DEPTH, playerIndex, player.move);
+            player.update();
+            player.draw();
+        }
+        
+        var alive = 0;
+        for (var playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex++) {
+            if (players[playerIndex].alive) alive++
+        }
+        if (alive == 0) return false;
+
+        // player1.move = negamax(player1.pos(), player2.pos(), 6, -1e6, 1e6, player1.move);
+        // player1.move = maxn([player1.pos(), player2.pos()], MAXN_DEPTH, 0, player1.move);
+        // player1.update();
+        // player1.draw();
+
+        // player2.move = negamax(player2.pos(), player1.pos(), 6, -1e6, 1e6, player2.move);
+        // player2.move = maxn([player1.pos(), player2.pos()], MAXN_DEPTH, 1, player2.move);
+        // player2.update();
+        // player2.draw();
+
+        // setTimeout(tick, 1000);
+
         // console.clear();
-        console.log('player, ai, moves', player.move, ai.move);
         console.log('negamax: ', window.iterations.negamax);
         console.log('floodfill: ', window.iterations.floodfill);
         console.log('evaluatePosition: ', window.iterations.evaluatePosition);
@@ -289,18 +324,6 @@
             evaluatePosition: 0,
         };
 
-        // player.move = negamax(player.pos(), ai.pos(), 6, -1e6, 1e6, player.move);
-        player.move = maxn([player.pos(), ai.pos()], MAXN_DEPTH, 0, player.move);
-        player.update();
-        player.draw();
-
-        // ai.move = negamax(ai.pos(), player.pos(), 6, -1e6, 1e6, ai.move);
-        ai.move = maxn([player.pos(), ai.pos()], MAXN_DEPTH, 1, ai.move);
-        ai.update();
-        ai.draw();
-
-        if (!player.alive && !ai.alive) return false;
-        // setTimeout(tick, 1000);
     }
 
     function Player(x, y, id, move, color)
