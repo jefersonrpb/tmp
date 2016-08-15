@@ -58,7 +58,7 @@
     }
 
     var MAX_PLAYERS = 4;
-    var MAXN_DEPTH = 8;//mapLength * 3;
+    var MAXN_DEPTH = 8;//MAX_PLAYERS * 2;
 
     var players = [];
     var _bestScore = [];
@@ -141,7 +141,7 @@
         return score;
     }
 
-    function evaluatePositions(positions, playerIndex) 
+    function evaluatePositions(positions) 
     {
         var distMaps = [];
         var scores = [];
@@ -150,37 +150,34 @@
             scores[indexPosition] = 0;
         }
 
-        for (var indexPosition = 0; indexPosition < positions.length; indexPosition++) {
+        // ignroe walls
+        for (var i = mapLength + 1; i < mapLength * (mapLength - 1) - 1; i++) {
 
-            if (indexPosition == playerIndex) continue;
+            //wall
+            if(map[i]) continue; 
 
-            // ignroe first and last rows, are walls
-            for(var i = mapLength + 1; i < mapLength * (mapLength - 1) - 1; i++) {
+            for (var currentPlayerIndex = 0; currentPlayerIndex < positions.length; currentPlayerIndex++) {
 
-                //wall
-                if(map[i]) continue; 
+                for (var indexPosition = 0; indexPosition < positions.length; indexPosition++) {
 
-                if (distMaps[playerIndex][i] && distMaps[indexPosition][i]) {
-                    var diff = distMaps[playerIndex][i] - distMaps[indexPosition][i];
-                    if (diff < 0) {
-                        scores[playerIndex]++;
-                        // scores[indexPosition]--;
-                    } else {
-                        // scores[playerIndex]--;
-                        // scores[indexPosition]++;
+                    // current player
+                    if (currentPlayerIndex == indexPosition) continue;
+
+                    if (distMaps[currentPlayerIndex][i] && distMaps[indexPosition][i]) {
+                        var diff = distMaps[currentPlayerIndex][i] - distMaps[indexPosition][i];
+                        if (diff < 0) {
+                            scores[currentPlayerIndex] += 1;
+                        }
+                        continue;
                     }
-                    continue;
+
+                    if (distMaps[currentPlayerIndex][i]) {
+                        scores[currentPlayerIndex] += 2;
+                    }
                 }
 
-                if (distMaps[playerIndex][i]) {
-                    scores[playerIndex] += 1;
-                    // scores[indexPosition] -= 1;
-                }
-                if (distMaps[indexPosition][i]) {
-                    // scores[playerIndex] -= 1;
-                    // scores[indexPosition] += 1;
-                }
             }
+
         }
 
         return scores;
@@ -262,7 +259,7 @@
     // http://web.cs.du.edu/~sturtevant/papers/multiplayergamesthesis.pdf
     function maxn(positions, depth, playerIndex, bestMove)
     {
-        if (depth == 0) return evaluatePositions(positions, playerIndex);
+        if (depth == 0) return evaluatePositions(positions);
 
         var nextPlayerIndex = (playerIndex + 1)  % MAX_PLAYERS;
         var bestScore = _bestScore.slice();
@@ -313,9 +310,9 @@
             }
 
             var player = players[playerIndex];
-            if (playerIndex > 0) {
+            // if (playerIndex > 0) {
                 player.move = maxn(positions, MAXN_DEPTH, playerIndex, player.move);
-            }
+            // }
             player.update();
             player.draw();
 
