@@ -1,4 +1,12 @@
 ;(function() {
+    
+    /* 
+    asm.js
+    # Correct. The SAME LLVM and JavaScript options are provided at both levels.
+    ./emcc -O2 a.cpp -o a.bc
+    ./emcc -O2 b.cpp -o b.bc
+    ./emcc -O2 a.bc b.bc -o project.js
+     */
 
     // width/height of canvas
     var mapSize = 300;
