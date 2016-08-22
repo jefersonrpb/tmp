@@ -9,15 +9,10 @@
 #include <time.h>
 
 typedef struct {
-    int x;
-    int y;
-} Point;
-
-typedef struct {
-    Point *position;
+    int position;
     int direction;
     int color;
-    bool dead;
+    bool alive;
 } LightCycle;
 
 enum directions { UP, DOWN, RIGHT, LEFT };
@@ -41,7 +36,6 @@ void create_window();
 void create_map();
 void create_players();
 void restore_window();
-void update_dumb_ai();
 void update_player();
 void start();
 void create_menu();
@@ -50,13 +44,7 @@ void create_bound(int x, int y, int width, int height);
 void game_over(bool player_loses);
 void fulfill(LightCycle *player);
 void input_player_direction(LightCycle *player);
-void update_player_position(LightCycle *player);
-void check_collisions(LightCycle *player, bool is_player);
-enum directions try_new_direction(LightCycle *player);
 LightCycle *new_player(int x, int y, enum directions direction, int color);
-Point *new_point(int x, int y);
-Point *get_next_position(Point *current_position, int direction);
-bool check_collision(Point *position);
 int *get_allowed_directions(LightCycle *player);
 
 #endif //GAME_INCLUDED

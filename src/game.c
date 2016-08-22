@@ -1,7 +1,7 @@
 #include "game.h"
 
-// 2d array
-int **map;
+// 2d map store in single dimensional array
+int *map;
 
 // key code
 int keypress;
@@ -9,9 +9,11 @@ int keypress;
 // game state
 int current_state;
 
+int map_length;
+
 // 40x40 + 2 cells for bounds
 int map_width = 42;
-int map_height = 22; 
+int map_height = 42;
 
 int max_players = 4;
 int remaining_players = 0;
@@ -47,12 +49,10 @@ void tick()
 
 void create_map()
 {
-    map = malloc(map_height * map_width * sizeof(int));
-    for (int x = 0; x < map_width; x++) {
-        map[x] = malloc(sizeof(int) * map_height);
-        for (int y = 0; y < map_height; y++) {
-            map[x][y] = EMPTY;
-        }
+    map_length = map_width * map_height;
+    map = malloc(map_length * sizeof(int));
+    for (int i = 0; i < map_length; i++) {
+        map[i] = EMPTY;
     }
     create_bound(0, 0, map_width - 1, map_height - 1);
 } 
@@ -60,19 +60,11 @@ void create_map()
 LightCycle *new_player(int x, int y, enum directions direction, int color)
 {
     LightCycle *player = malloc(sizeof(LightCycle));
-    player->position = new_point(x, y);
+    player->position = x + y * map_width;
     player->direction = direction;
     player->color = color;
-    player->dead = false;
+    player->alive = true;
     return player;
-}
-
-Point *new_point(int x, int y)
-{
-    Point *position = malloc(sizeof(Point));
-    position->x = x;
-    position->y = y;
-    return position;
 }
 
 void update()
@@ -91,10 +83,7 @@ void update()
 
     input_player_direction(ptr_players[0]);
     for (int i = 0; i < max_players; i++) {
-        if (ptr_players[i]->dead) continue;
-        if (i > 0) update_dumb_ai(ptr_players[i]);
-        update_player_position(ptr_players[i]);
-        check_collisions(ptr_players[i], i > 0);
+        if (!ptr_players[i]->alive) continue;
         fulfill(ptr_players[i]);
     }
 } 
@@ -103,11 +92,12 @@ void draw()
 {
     if (current_state == GAME_OVER) return;
     if (current_state == PLAY) erase();
-    for (int x = 0; x < map_width; x++) {
-        for (int y = 0; y < map_height; y++) {
-            draw_char(x, y, map[x][y]);
-        }
-    } 
+    for (int i = 0; i < map_length; i++) {
+        size_t x = map[i] % map_length;
+        size_t y = (int) map[i] / map_length;
+        draw_char(x, y, map[i]);
+    }
+    
     refresh();
 }
 
@@ -161,60 +151,9 @@ void input_player_direction(LightCycle *player)
     if (direction == directions[0] || direction == directions[1])  player->direction = direction;
 }
 
-void update_player_position(LightCycle *player)
-{
-    player->position = get_next_position(player->position, player->direction);
-}
-
 void fulfill(LightCycle *player)
 {
-    map[player->position->x][player->position->y] = WALL | COLOR_PAIR(player->color);
-}
-
-Point *get_next_position(Point *current_position, int direction)
-{
-    Point *position = new_point(current_position->x, current_position->y);
-    if (direction == RIGHT) position->x += 1;
-    if (direction == LEFT) position->x -= 1;
-    if (direction == UP) position->y -= 1;
-    if (direction == DOWN) position->y += 1;
-    return position;
-}
-
-bool check_collision(Point *position)
-{
-    if (map[position->x][position->y] == EMPTY) return false;
-    return true;
-}
-
-void check_collisions(LightCycle *player, bool is_ai)
-{
-    if (!check_collision(player->position)) return;
-    if (!is_ai) return game_over(true);
-    remaining_players -= 1;
-    if (remaining_players == 1) return game_over(false);
-    player->dead = true;
-}
-
-void update_dumb_ai(LightCycle *ai)
-{
-    if (rand() % 10 == 9) ai->direction = try_new_direction(ai);
-
-    // if will collide force new direction
-    if (check_collision(get_next_position(ai->position, ai->direction))) {
-        ai->direction = try_new_direction(ai);
-    }
-}
-
-enum directions try_new_direction(LightCycle *player)
-{
-    int *directions = get_allowed_directions(player);
-    enum directions direction = rand() % 1 == 1 ? directions[0] : directions[1]; 
-    // it was at this moment, he knew he fucked up
-    if (check_collision(get_next_position(player->position, direction))) {
-        direction = direction == directions[0] ? directions[1]: directions[0]; 
-    }
-    return direction;
+    map[player->position] = WALL | COLOR_PAIR(player->color);
 }
 
 int *get_allowed_directions(LightCycle *player)
@@ -292,10 +231,12 @@ void create_window()
     // disable waiting for user input
     nodelay(stdscr, TRUE);
 
+    // allow transparent color
     use_default_colors();
     assume_default_colors(-1,-1);
     start_color();
 
+    // registre colors
     init_pair(COLOR_WHITE, COLOR_BLACK, COLOR_WHITE);
     init_pair(COLOR_BLUE, COLOR_BLUE, -1);
     init_pair(COLOR_RED, COLOR_RED, -1);
@@ -318,16 +259,16 @@ void game_over(bool player_loses)
 
 void create_bound(int x, int y, int width, int height)
 {
-    for (int _y = y; _y < height; _y++) {
-        map[x][_y] = BOUND_LINE_VERTICAL;
-        map[width][_y] = BOUND_LINE_VERTICAL;
-    }
-    for (int _x = x; _x < width; _x++) {
-        map[_x][0] = BOUND_LINE_HORIZONTAL;
-        map[_x][height] = BOUND_LINE_HORIZONTAL;
-    }
-    map[x][y] = BOUND_CORNER;
-    map[x][height] = BOUND_CORNER;
-    map[width][y] = BOUND_CORNER;
-    map[width][height] = BOUND_CORNER;
+    //for (int _y = y; _y < height; _y++) {
+    //    map[x][_y] = bound_line_vertical;
+    //    map[width][_y] = bound_line_vertical;
+    //}
+    //for (int _x = x; _x < width; _x++) {
+    //    map[_x][0] = bound_line_horizontal;
+    //    map[_x][height] = bound_line_horizontal;
+    //}
+    //map[x][y] = bound_corner;
+    //map[x][height] = bound_corner;
+    //map[width][y] = bound_corner;
+    //map[width][height] = bound_corner;
 }
