@@ -11,9 +11,9 @@ int current_state;
 
 int map_length;
 
-// 40x40 + 2 cells for bounds
+// 40x20 + 2 cells for bounds
 int map_width = 42;
-int map_height = 42;
+int map_height = 22;
 
 int max_players = 4;
 int remaining_players = 0;
@@ -93,8 +93,8 @@ void draw()
     if (current_state == GAME_OVER) return;
     if (current_state == PLAY) erase();
     for (int i = 0; i < map_length; i++) {
-        size_t x = map[i] % map_length;
-        size_t y = (int) map[i] / map_length;
+        int x = i % map_width;
+        int y = (int) i / map_width;
         draw_char(x, y, map[i]);
     }
     
@@ -259,16 +259,21 @@ void game_over(bool player_loses)
 
 void create_bound(int x, int y, int width, int height)
 {
-    //for (int _y = y; _y < height; _y++) {
-    //    map[x][_y] = bound_line_vertical;
-    //    map[width][_y] = bound_line_vertical;
-    //}
-    //for (int _x = x; _x < width; _x++) {
-    //    map[_x][0] = bound_line_horizontal;
-    //    map[_x][height] = bound_line_horizontal;
-    //}
-    //map[x][y] = bound_corner;
-    //map[x][height] = bound_corner;
-    //map[width][y] = bound_corner;
-    //map[width][height] = bound_corner;
+    for (int _y = y; _y < height; _y++) {
+        /* map[x][_y] = BOUND_LINE_VERTICAL; */
+        map[ x + _y * map_width] = BOUND_LINE_VERTICAL; 
+
+        map[ width + _y * map_width] = BOUND_LINE_VERTICAL; 
+        /* map[width][_y] = BOUND_LINE_VERTICAL; */
+    }
+    for (int _x = x; _x < width; _x++) {
+       /* map[_x][0] = BOUND_LINE_HORIZONTAL; */
+       map[_x + 0 * map_width] = BOUND_LINE_HORIZONTAL;
+       /* map[_x][height] = BOUND_LINE_HORIZONTAL; */
+       map[_x + height * map_width] = BOUND_LINE_HORIZONTAL;
+    }
+    map[x + y * map_width] = BOUND_CORNER;
+    map[x + height * map_width] = BOUND_CORNER;
+    map[width + y * map_width] = BOUND_CORNER;
+    map[width + height * map_width] = BOUND_CORNER;
 }
