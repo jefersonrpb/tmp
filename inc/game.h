@@ -15,7 +15,7 @@ typedef struct {
     bool alive;
 } LightCycle;
 
-enum directions { UP, DOWN, RIGHT, LEFT };
+enum directions {UP = 0, DOWN = 1, RIGHT = 2, LEFT = 3};
 enum states { PLAY, GAME_OVER, MENU };
 enum draw { 
     WALL = '#', 

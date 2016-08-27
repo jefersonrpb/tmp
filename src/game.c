@@ -9,7 +9,7 @@ int keypress;
 // game state
 int current_state;
 
-int map_length;
+int map_length, map_moves[4];
 
 // 40x20 + 2 cells for bounds
 int map_width = 42;
@@ -54,6 +54,16 @@ void create_map()
     for (int i = 0; i < map_length; i++) {
         map[i] = EMPTY;
     }
+
+    // west, 
+    map_moves[0] = -1;
+    // north, 
+    map_moves[1] = -map_width;
+    // east, 
+    map_moves[2] = 1; 
+    //south
+    map_moves[3] = map_width;
+
     create_bound(0, 0, map_width - 1, map_height - 1);
 } 
 
@@ -83,7 +93,13 @@ void update()
 
     input_player_direction(ptr_players[0]);
     for (int i = 0; i < max_players; i++) {
+
+        // player dead
         if (!ptr_players[i]->alive) continue;
+
+        // update position
+        ptr_players[i]->position += map_moves[ptr_players[i]->direction];
+        
         fulfill(ptr_players[i]);
     }
 } 
@@ -260,16 +276,11 @@ void game_over(bool player_loses)
 void create_bound(int x, int y, int width, int height)
 {
     for (int _y = y; _y < height; _y++) {
-        /* map[x][_y] = BOUND_LINE_VERTICAL; */
         map[ x + _y * map_width] = BOUND_LINE_VERTICAL; 
-
         map[ width + _y * map_width] = BOUND_LINE_VERTICAL; 
-        /* map[width][_y] = BOUND_LINE_VERTICAL; */
     }
     for (int _x = x; _x < width; _x++) {
-       /* map[_x][0] = BOUND_LINE_HORIZONTAL; */
        map[_x + 0 * map_width] = BOUND_LINE_HORIZONTAL;
-       /* map[_x][height] = BOUND_LINE_HORIZONTAL; */
        map[_x + height * map_width] = BOUND_LINE_HORIZONTAL;
     }
     map[x + y * map_width] = BOUND_CORNER;
