@@ -9,11 +9,12 @@ int keypress;
 // game state
 int current_state;
 
-int map_length, map_moves[4];
-
 // 40x20 + 2 cells for bounds
 int map_width = 42;
 int map_height = 22;
+
+int map_length;
+int map_moves[4];
 
 int max_players = 4;
 int remaining_players = 0;
@@ -55,13 +56,9 @@ void create_map()
         map[i] = EMPTY;
     }
 
-    // west, 
     map_moves[0] = -1;
-    // north, 
     map_moves[1] = -map_width;
-    // east, 
     map_moves[2] = 1; 
-    //south
     map_moves[3] = map_width;
 
     create_bound(0, 0, map_width - 1, map_height - 1);
