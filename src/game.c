@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
 void start()
 {
-    create_map();
+    /* create_map(); */
     create_players();
     current_state = PLAY;
 }
@@ -97,6 +97,7 @@ void update()
         // update position
         ptr_players[i]->position += map_moves[ptr_players[i]->direction];
         
+        // add player to 2d map
         fulfill(ptr_players[i]);
     }
 } 
@@ -112,6 +113,12 @@ void draw()
     }
     
     refresh();
+}
+
+int *floodfill(int curr_pos)
+{
+    int *q = malloc(sizeof(curr_pos) * map_length);
+    q[0] = curr_pos;
 }
 
 void create_players()
@@ -189,6 +196,23 @@ int *get_allowed_directions(LightCycle *player)
 
 void create_menu()
 {
+    // test {
+
+    current_state = MENU;
+    create_map();
+    int  curr_pos = 2+2*map_width;
+    floodfill(curr_pos);
+    restore_window();
+    printf("ha\n");
+    exit(0);
+
+    // } test
+
+    
+
+
+
+
     current_state = MENU;
     create_map();
     draw();
