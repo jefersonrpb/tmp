@@ -243,7 +243,7 @@ int *maxn(int *positions, int depth, int player_index, int best_move)
 
         // just for evaluate
         map[_positions[player_index]] = 'f';
-        int *scores = maxn(_positions, depth - 1, next_player_index, -1);
+        int *scores = maxn(_positions, depth - 1, next_player_index, -10);
         map[_positions[player_index]] = EMPTY;
 
         if (scores[player_index] < 0) {
@@ -256,7 +256,7 @@ int *maxn(int *positions, int depth, int player_index, int best_move)
         }
 
     }
-    if (best_move != -1) return (void*)(long) best_move;
+    if (best_move != -10) return (void*)(long) best_move;
     return best_scores;
 }
 
