@@ -49,7 +49,7 @@ void input_player_direction(LightCycle *player);
 LightCycle *new_player(int x, int y, enum directions direction, int color);
 int *get_allowed_directions(LightCycle *player);
 
-int evaluatePositions(int *positions);
-int maxn(int *positions, int depth, int playerIndex, int bestMove);
+int *evaluatePositions(int *positions);
+int *maxn(int *positions, int depth, int playerIndex, int bestMove);
 
 #endif //GAME_INCLUDED

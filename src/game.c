@@ -95,6 +95,19 @@ void update()
         if (!ptr_players[i]->alive) continue;
 
         // update position
+        if (i > 0) {
+
+            int *positions = malloc(max_players * sizeof(int));
+
+            for (int i = 0; i < max_players; i++) {
+                positions[i] = ptr_players[i]->position;
+            }
+
+            for (int i = 1; i < max_players; i++) {
+                ptr_players[i]->direction = (int) (long) maxn(positions, 6, i, ptr_players[i]->direction);
+            } 
+        }
+
         ptr_players[i]->position += map_moves[ptr_players[i]->direction];
         
         // add player to 2d map
@@ -138,7 +151,7 @@ array *floodfill(int curr_pos)
 
         for (int i = 0; i < q->length; i++) {
 
-            int _id = (int) (long) array_get(q, i);
+            int _id = (long int) array_get(q, i);
             for (int move = 0; move < 4; move++) {
 
                 int nextId = _id + map_moves[move];
@@ -161,44 +174,90 @@ array *floodfill(int curr_pos)
     return distMap;
 }
 
-int evaluatePositions(int *positions)
+int *evaluatePositions(int *positions)
 {
+    int *scores;
+    array **distMaps = malloc(max_players * sizeof(array));
 
+    for (int i = 0; i < max_players; i++) {
+        distMaps[i] = floodfill(positions[i]);
+        scores[i] = 0;
+    }
+
+    for (int i = map_length + 1; i < map_length * (map_length - 1) - 1; i++) {
+
+        if (map[i] == EMPTY || map[i] == WALL) {
+            continue;
+        }
+
+        for (int curr_player_index = 0; curr_player_index < max_players; curr_player_index++) {
+        
+            for (int position_index = 0; position_index < max_players; position_index++) {
+            
+                if (curr_player_index == position_index) {
+                    continue;
+                }
+
+                if (array_get(distMaps[curr_player_index], i) != NULL &&  array_get(distMaps[position_index], i) != NULL) {
+                    int diff = (long int) array_get(distMaps[curr_player_index], i) - (long int) array_get(distMaps[position_index], i);
+                    if (diff < 0) {
+                        scores[curr_player_index] += 1;
+                    }
+                    continue;
+                }
+
+                if (array_get(distMaps[curr_player_index], i) != NULL) {
+                    scores[curr_player_index] += 2;
+                }
+            }
+
+        }
+    }
+
+    return scores;
 }
 
 // https://project.dke.maastrichtuniversity.nl/games/files/phd/Nijssen_thesis.pdf
 // http://web.cs.du.edu/~sturtevant/papers/multiplayergamesthesis.pdf
-int maxn(int *positions, int depth, int playerIndex, int bestMove)
+int *maxn(int *positions, int depth, int player_index, int best_move)
 {
     if (depth == 0) return evaluatePositions(positions);
 
-    int nextPlayerIndex = (playerIndex + 1) % 4;
-    int bestScore[4] = {99999, 99999, 99999, 99999};
+    int next_player_index = (player_index + 1) % max_players;
+    int *best_scores = (int[4]) {99999, 99999, 99999, 99999};
 
     for (int move = 0; move < 4; move++) {
 
         // clone
-        int *_positions = positions;
-        _positions[playerIndex] += map_moves[move];
+        /* int *_positions = positions; */
+        int *_positions = malloc(max_players * sizeof(int));
+        for (int i = 0; i < max_players; i++) {
+            _positions[i] = positions[i];
+        }
 
-        if (map[_positions[playerIndex]]) {
+        _positions[player_index] += map_moves[move];
+
+        if (map[_positions[player_index]] != EMPTY) {
             continue;
         }
 
         // just for evaluate
-        map[_positions[playerIndex]] = WALL;
-        int scores = maxn(_positions, depth - 1, nextPlayerIndex);
-        map[_positions[playerIndex]] = EMPTY;
+        map[_positions[player_index]] = 'f';
+        int *scores = maxn(_positions, depth - 1, next_player_index, -1);
+        map[_positions[player_index]] = EMPTY;
 
-        if (scores[playerIndex] < 0) {
-            scores[playerIndex] = 1;
+        if (scores[player_index] < 0) {
+            scores[player_index] = 1;
         }
 
-        if (scores[playerIndex] > bestScore[playerIndex]) {
-            bestScore = *scores;
-            bestMove = move;
+        if (scores[player_index] > best_scores[player_index]) {
+            best_scores = scores;
+            best_move = move;
         }
+
     }
+    if (best_move != -1) return (void*)(long) best_move;
+    return best_scores;
 }
 
 void create_players()
@@ -278,21 +337,53 @@ void create_menu()
 {
     // test {
 
-    current_state = MENU;
-    create_map();
-    int  curr_pos = 2+2*map_width;
-    restore_window();
-    array * distMap = floodfill(curr_pos);
+    /* current_state = MENU; */
+    /* create_map(); */
+    /* int  curr_pos = 2+2*map_width; */
+    /* restore_window(); */
+    /* create_players(); */
 
-    for (int i = 0; i < distMap->length; i++) {
-        if (array_get(distMap, i) != NULL) {
-            printf(" - %d => %d\n", i, (int)(long) array_get(distMap, i));
-        }
-    }
 
-    printf("curr_pos[%d]\n", curr_pos);
-    exit(0);
+    /*  */
+    /* for (int times = 0; times < 10; times++) { */
+    /*     printf(" - #%d \n", times); */
+    /*  */
+    /*     for (int i = 0; i < max_players; i++) { */
+    /*  */
+    /*         printf("   %d >>> %d -> %d -> %d = %d\n", ptr_players[i]->position, i, ptr_players[i]->direction, map_moves[ptr_players[i]->direction], ptr_players[i]->position + map_moves[ptr_players[i]->direction]); */
+    /*         #<{(| ptr_players[i]->position += map_moves[ptr_players[i]->direction]; |)}># */
+    /*     } */
+    /* } */
 
+    /* int *positions = malloc(max_players * sizeof(int)); */
+    /*  */
+    /* for (int i = 0; i < max_players; i++) { */
+    /*     positions[i] = ptr_players[i]->position; */
+    /* } */
+    /*  */
+    /* for (int i = 0; i < max_players; i++) { */
+    /*     printf(" - %d => %d | %d/%d\n", i, positions[i], (int) positions[i] % map_width, (int)positions[i]/map_width); */
+    /* } */
+
+    /* for (int i = 0; i < max_players; i++) { */
+    /*     ptr_players[i]->position = (long int) maxn(positions, 6, i, ptr_players[i]->position); */
+    /* } */
+
+    /* printf("\n\n");  */
+    /* for (int i = 0; i < max_players; i++) { */
+    /*     printf(" - %d => %d | %d/%d\n", i, positions[i], (int) positions[i] % max_players, (int)positions[i]/max_players); */
+    /* } */
+    /* array * distMap = floodfill(curr_pos); */
+    /*  */
+    /* for (int i = 0; i < distMap->length; i++) { */
+    /*     if (array_get(distMap, i) != NULL) { */
+    /*         printf(" - %d => %d\n", i, (int)(long) array_get(distMap, i)); */
+    /*     } */
+    /* } */
+
+    /* printf("curr_pos[%d]\n", curr_pos); */
+    /* exit(0); */
+    /*  */
     // } test
 
     

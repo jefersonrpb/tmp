@@ -2,6 +2,16 @@
 #include <stdlib.h>
 #include "array.h"
 
+/*
+ 
+   like js typedArry
+   - ptrArray
+   - uint8Array
+   - int8Array
+   - uint32Array
+
+*/
+
 array *array_new()
 {
     array* data = malloc(sizeof(array));
