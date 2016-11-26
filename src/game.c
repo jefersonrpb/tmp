@@ -242,7 +242,7 @@ int *maxn(int *positions, int depth, int player_index, int best_move)
         }
 
         // just for evaluate
-        map[_positions[player_index]] = 'f';
+        map[_positions[player_index]] = WALL;
         int *scores = maxn(_positions, depth - 1, next_player_index, -10);
         map[_positions[player_index]] = EMPTY;
 
