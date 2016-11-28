@@ -1,32 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "array.h"
+#include "ptr_array.h"
 
 /*
  
    like js typedArry
-   - ptrArray
-   - uint8Array
-   - int8Array
-   - uint32Array
+   - ptrptr_array
+   - uint8ptr_array
+   - int8ptr_array
+   - uint32ptr_array
 
 */
 
-array *array_new()
+ptr_array *ptr_array_new()
 {
-    array* data = malloc(sizeof(array));
-    array_init(data);
+    ptr_array* data = malloc(sizeof(ptr_array));
+    ptr_array_init(data);
     return data;
 }
 
-void array_init(array *data)
+void ptr_array_init(ptr_array *data)
 {
-    data->size = ARRAY_INIT_SIZE;
+    data->size = PTR_ARRAY_INIT_SIZE;
     data->length = 0;
     data->items = malloc(sizeof(void *) * data->size);
 }
 
-static void array_resize(array *data, int size)
+static void ptr_array_resize(ptr_array *data, int size)
 {
     void **items = realloc(data->items, sizeof(void *) * size);
     if (items) {
@@ -35,15 +35,15 @@ static void array_resize(array *data, int size)
     }
 }
 
-void array_add(array *data, void *item)
+void ptr_array_add(ptr_array *data, void *item)
 {
     if (data->size == data->length) {
-        array_resize(data, data->size * 2);
+        ptr_array_resize(data, data->size * 2);
     }
     data->items[data->length++] = item;
 }
 
-void array_set(array *data, int index, void *item)
+void ptr_array_set(ptr_array *data, int index, void *item)
 {
     if (index < 0) {
         return;
@@ -51,14 +51,14 @@ void array_set(array *data, int index, void *item)
 
     if (index > data->length) {
         for (int i = 0; i < index + 1; i++) {
-            array_add(data, NULL);
+            ptr_array_add(data, NULL);
         }
     }
 
     data->items[index] = item;
 }
 
-bool array_has(array *data, int index)
+bool ptr_array_has(ptr_array *data, int index)
 {
     if (index < 0 || index > data->length) {
         return false;
@@ -69,7 +69,7 @@ bool array_has(array *data, int index)
     return true;
 }
 
-void *array_get(array *data, int index)
+void *ptr_array_get(ptr_array *data, int index)
 {
     if (index >= 0 && index < data->length) {
         return data->items[index];
@@ -77,7 +77,7 @@ void *array_get(array *data, int index)
     return NULL;
 }
 
-void array_delete(array *data, int index)
+void ptr_array_delete(ptr_array *data, int index)
 {
     if (index < 0 || index >= data->length) {
         return;
@@ -91,17 +91,17 @@ void array_delete(array *data, int index)
     data->length--;
 
     if (data->length > 0 && data->length <= data->size / 4) {
-        array_resize(data, data->size / 2);
+        ptr_array_resize(data, data->size / 2);
     }
 }
 
-void array_clear(array *data)
+void ptr_array_clear(ptr_array *data)
 {
-    array_free(data);
-    array_init(data);
+    ptr_array_free(data);
+    ptr_array_init(data);
 }
 
-void array_free(array *data)
+void ptr_array_free(ptr_array *data)
 {
     for (int i = 0; i < data->length; i++) {
         data->items[i] = NULL;

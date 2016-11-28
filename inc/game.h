@@ -7,7 +7,8 @@
 #include <curses.h>
 #include <unistd.h>
 #include <time.h>
-#include <array.h>
+#include <int_array.h>
+#include <stdbool.h>
 
 typedef struct {
     int position;
@@ -44,7 +45,7 @@ void draw_char(int y, int x, int value);
 void create_bound(int x, int y, int width, int height);
 void game_over(bool player_loses);
 void fulfill(LightCycle *player);
-array *floodfill(int curr_pos);
+int_array *floodfill(int curr_pos);
 void input_player_direction(LightCycle *player);
 LightCycle *new_player(int x, int y, enum directions direction, int color);
 int *get_allowed_directions(LightCycle *player);

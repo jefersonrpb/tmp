@@ -65,7 +65,7 @@
         ctx.stroke();
     }
 
-    var MAX_PLAYERS = 4;
+    var MAX_PLAYERS = 2;
     var MAXN_DEPTH = 8;//MAX_PLAYERS * 2;
 
     var players = [];
@@ -318,9 +318,9 @@
             }
 
             var player = players[playerIndex];
-            // if (playerIndex > 0) {
+            if (playerIndex > 0) {
                 player.move = maxn(positions, MAXN_DEPTH, playerIndex, player.move);
-            // }
+            }
             player.update();
             player.draw();
 
