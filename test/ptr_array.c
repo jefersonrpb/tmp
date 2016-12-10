@@ -45,14 +45,7 @@ int main(int argc, char* argv[])
     TEST_IT(test_initial_value);
     TEST_IT(test_bound);
 
-    TEST_RUN();
-
-    TEST_DESCRIBE("int_array()");
-    TEST_IT(test_bound);
-    TEST_IT(test_size);
-    TEST_RUN();
-   
-    return 0;
+    return TEST_RUN();
 }
 
 

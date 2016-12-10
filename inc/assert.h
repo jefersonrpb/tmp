@@ -47,7 +47,7 @@ static int __test_new(char * label)
 
     __test * test = (__test*) malloc(sizeof(__test));
 
-    test->label = (char*) malloc(100 * sizeof(char));
+    test->label = (char*) malloc(1024 * sizeof(char));
 
     test->assertions.count = 0;
     test->assertions.fails = 0;
@@ -75,7 +75,7 @@ static int __test_item_resize(__test * test, int size)
 static int __test_item_add(char * label, void * fn) 
 {
     __test_item * item = (__test_item*) malloc(sizeof(__test_item));
-    item->label = malloc(sizeof(char) * 100);
+    item->label = malloc(sizeof(char) * 1024);
     item->fn = fn;
     item->label = label; 
 
@@ -127,12 +127,14 @@ static int __test_run()
 
     }
 
-    printf("\n assertions: %d, fails: %d\n", test->assertions.count, test->assertions.fails);
+    printf("\n assertions: %d, fails: %d\n", test->assertions.count, 
+            test->assertions.fails);
 
     if (__tests_length == __tests_size) {
         printf("\n");
     }
-    return 0;
+
+    return test->assertions.fails > 0;
 }
 
 static void __test_assert(const int result, const char* const expression, 
