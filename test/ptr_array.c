@@ -1,26 +1,56 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
-int foo (int a, int b)
-{
-    // https://gcc.gnu.org/onlinedocs/gcc/Nested-Functions.html
-    // nested function, function inside function
-    int square (int z) { return z * z; }
+int * ptr;
 
-    return square (a) + square (b);
+int test_size() 
+{
+    assert(1 == 1);
+    return sizeof(ptr) == 10 * sizeof(int);
 }
 
-int main(int argc, char* argv[]) {
+int test_initial_value() 
+{
+    assert(1 == 2);
+    assert(1 == 1);
+    assert(1 == 5);
+    return 0;
+}
 
-    describe("test ptr_array", {
-            
-        it("test bound\n", {
+void test_bound()
+{
+    assert(1 == 1);
+}
 
-            assert(1 == 2);
-                
-        });
+void tearup()
+{
+    ptr = malloc(10 * sizeof(int));
+}
 
-    });
+void teardown()
+{
+    free(ptr);
+    ptr = NULL;
+}
+
+int main(int argc, char* argv[]) 
+{
+    TEST_DESCRIBE("ptr_array()");
+
+    TEST_TEARUP(tearup);
+    TEST_TEARDOWN(teardown);
+
+    TEST_IT(test_size);
+    TEST_IT(test_initial_value);
+    TEST_IT(test_bound);
+
+    TEST_RUN();
+
+    TEST_DESCRIBE("int_array()");
+    TEST_IT(test_bound);
+    TEST_IT(test_size);
+    TEST_RUN();
    
     return 0;
 }
