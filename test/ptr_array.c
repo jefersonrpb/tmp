@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <test.h>
 
 int * ptr;
 
@@ -36,16 +36,14 @@ void teardown()
 
 int main(int argc, char* argv[]) 
 {
-    TEST_DESCRIBE("ptr_array()");
+    test_describe("ptr_array()");
 
-    TEST_TEARUP(tearup);
-    TEST_TEARDOWN(teardown);
+    test_tearup(tearup);
+    test_teardown(teardown);
 
-    TEST_IT(test_size);
-    TEST_IT(test_initial_value);
-    TEST_IT(test_bound);
+    test_it("should be same size", test_size);
+    test_it("should be initial size", test_initial_value);
+    test_it("should not allow pass boudings", test_bound);
 
-    return TEST_RUN();
+    return test_run();
 }
-
-

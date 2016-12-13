@@ -30,7 +30,7 @@ static __test ** __tests;
 static __test_assertions __tests_curr_assert = {0,0};
 static char * __tests_curr_assert_buff;
 
-static int __test_new(char * label)
+static int test_describe(char * label)
 {
     if (__tests_length == __tests_size) {
         __tests_size += 1;
@@ -72,7 +72,7 @@ static int __test_item_resize(__test * test, int size)
     return 0; 
 }
 
-static int __test_item_add(char * label, void * fn) 
+static int test_it(char * label, void * fn) 
 {
     __test_item * item = (__test_item*) malloc(sizeof(__test_item));
     item->label = malloc(sizeof(char) * 1024);
@@ -91,7 +91,7 @@ static int __test_item_add(char * label, void * fn)
     return 0;
 }
 
-static int __test_run()
+static int test_run()
 {
     if (__tests_length == 0) {
         return 0;
@@ -157,22 +157,8 @@ static void __test_assert(const int result, const char* const expression,
 #define assert(expression) \
     __test_assert((int)(expression), #expression, __func__, __FILE__, __LINE__);
 
-#define SAFE_BLOCK(block) do {\
-	block \
-} while(0)
-
-#define TEST_DESCRIBE(text) \
-    __test_new(text);
-
-#define TEST_TEARUP(fn) \
+#define test_tearup(fn) \
     printf("tearup()\n");
 
-#define TEST_TEARDOWN(fn) \
+#define test_teardown(fn) \
     printf("teardown()\n");
-
-#define TEST_IT(fn) \
-    __test_item_add(#fn, fn);
-
-#define TEST_RUN() \
-    __test_run();
-
