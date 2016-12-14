@@ -36,14 +36,14 @@ void teardown()
 
 int main(int argc, char* argv[]) 
 {
-    test_describe("ptr_array()");
+    Test_describe("ptr_array()");
 
-    test_tearup(tearup);
-    test_teardown(teardown);
+    Test_tearup(tearup);
+    Test_teardown(teardown);
 
-    test_it("should be same size", test_size);
-    test_it("should be initial size", test_initial_value);
-    test_it("should not allow pass boudings", test_bound);
+    Test_it("should be same size", test_size);
+    Test_it("should be initial size", test_initial_value);
+    Test_it("should not allow pass boudings", test_bound);
 
-    return test_run();
+    return Test_run();
 }
