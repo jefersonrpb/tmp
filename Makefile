@@ -24,11 +24,12 @@ test_build_all_and_run:
 		bin/test/$$key;\
 	done
 
-test_ptr_array: src/ptr_array.c 
-	$(CC) test/ptr_array.c $^ -o bin/test/ptr_array -lncurses -Wall -Werror -ggdb -I inc
+obj/test.o: src/test.c 
+	mkdir -p obj/
+	$(CC) src/test.c -c -o obj/test.o -I inc
 
-test_int_array: src/int_array.c 
-	$(CC) test/int_array.c -o bin/test/int_array $^ -lncurses -Wall -Werror -ggdb -I inc
+test_ptr_array: obj/test.o src/ptr_array.c 
+	$(CC) test/ptr_array.c $^ -o bin/test/ptr_array -lncurses -Wall -Werror -ggdb -I inc
 
 format:
 	astyle --options=$(HOME)/.astyle_format.conf *.c *.h

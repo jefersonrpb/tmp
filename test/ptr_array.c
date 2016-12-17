@@ -4,18 +4,14 @@
 
 int * ptr;
 
-int test_size() 
+void test_initial_value() 
 {
-    assert(1 == 1);
-    return sizeof(ptr) == 10 * sizeof(int);
+    assert(ptr != NULL);
 }
 
-int test_initial_value() 
+void test_size() 
 {
-    assert(1 == 2);
-    assert(1 == 1);
-    assert(1 == 5);
-    return 0;
+    assert(sizeof(ptr) == sizeof(int*));
 }
 
 void test_bound()
@@ -41,8 +37,8 @@ int main(int argc, char* argv[])
     Test_tearup(tearup);
     Test_teardown(teardown);
 
-    Test_it("should be same size", test_size);
     Test_it("should be initial size", test_initial_value);
+    Test_it("should be same size", test_size);
     Test_it("should not allow pass boudings", test_bound);
 
     return Test_run();
