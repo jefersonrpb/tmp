@@ -7,17 +7,17 @@
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
-typedef struct assertion_count_t {
+typedef struct {
     int total;
     int failed;
 } AssertionCount;
 
-typedef struct test_item_t {
+typedef struct {
     char* label;
     void (*fn)(void);
 } TestItem;
 
-typedef struct test_t {
+typedef struct {
     char* label;
     TestItem** items;
     AssertionCount* assertion;
@@ -25,7 +25,7 @@ typedef struct test_t {
     int items_length;
 } Test;
 
-typedef struct globals_t {
+typedef struct {
     int tests_length;
     int tests_size;
     Test** tests;
@@ -172,7 +172,7 @@ static int _test_run(int test_index) {
         }
     }
 
-    printf("\n assertions: %d, failed: %d\n", test->assertion->total, 
+    printf("\n assertions: %d, failures: %d\n", test->assertion->total, 
             test->assertion->failed);
 
     return test->assertion->failed;
@@ -204,7 +204,9 @@ void Test_assert(const int result, const char* const expression,
     _globals->assertion->total++;
     if (result == 0) {
         _globals->assertion->failed++;
-        sprintf(_globals->buf, "\r         fail %s on %s:%d\n", expression, file, line);
+        char buf[1024];
+        sprintf(buf, "\r         fail %s on %s:%d\n", expression, file, line);
+        strcat(_globals->buf, buf);
     }
 }
 

@@ -2,21 +2,16 @@
 #include <stdlib.h>
 #include "ptr_array.h"
 
-ptr_array *ptr_array_new()
-{
-    ptr_array* data = malloc(sizeof(ptr_array));
-    ptr_array_init(data);
-    return data;
-}
+#define PTR_ARRAY_INIT_SIZE 4
 
-void ptr_array_init(ptr_array *data)
+static void ptr_array_init(PtrArray *data)
 {
     data->size = PTR_ARRAY_INIT_SIZE;
     data->length = 0;
     data->items = malloc(sizeof(void *) * data->size);
 }
 
-static void ptr_array_resize(ptr_array *data, int size)
+static void ptr_array_resize(PtrArray *data, int size)
 {
     void **items = realloc(data->items, sizeof(void *) * size);
     if (items) {
@@ -25,21 +20,29 @@ static void ptr_array_resize(ptr_array *data, int size)
     }
 }
 
-void ptr_array_add(ptr_array *data, void *item)
+PtrArray *ptr_array_new()
 {
-    if (data->size == data->length) {
-        ptr_array_resize(data, data->size * 2);
+    PtrArray* data = malloc(sizeof(PtrArray));
+    ptr_array_init(data);
+    return data;
+}
+
+void ptr_array_add(PtrArray *data, void *item)
+{
+    if (data->length == data->size) {
+        ptr_array_resize(data, data->size + PTR_ARRAY_INIT_SIZE);
     }
     data->items[data->length++] = item;
 }
 
-void ptr_array_set(ptr_array *data, int index, void *item)
+void ptr_array_set(PtrArray *data, int index, void *item)
 {
     if (index < 0) {
         return;
     }
 
     if (index > data->length) {
+        ptr_array_resize(data, index + PTR_ARRAY_INIT_SIZE);
         for (int i = 0; i < index + 1; i++) {
             ptr_array_add(data, NULL);
         }
@@ -48,7 +51,7 @@ void ptr_array_set(ptr_array *data, int index, void *item)
     data->items[index] = item;
 }
 
-bool ptr_array_has(ptr_array *data, int index)
+bool ptr_array_has(PtrArray *data, int index)
 {
     if (index < 0 || index > data->length) {
         return false;
@@ -59,7 +62,7 @@ bool ptr_array_has(ptr_array *data, int index)
     return true;
 }
 
-void *ptr_array_get(ptr_array *data, int index)
+void *ptr_array_get(PtrArray *data, int index)
 {
     if (index >= 0 && index < data->length) {
         return data->items[index];
@@ -67,7 +70,7 @@ void *ptr_array_get(ptr_array *data, int index)
     return NULL;
 }
 
-void ptr_array_delete(ptr_array *data, int index)
+void ptr_array_delete(PtrArray *data, int index)
 {
     if (index < 0 || index >= data->length) {
         return;
@@ -85,16 +88,16 @@ void ptr_array_delete(ptr_array *data, int index)
     }
 }
 
-void ptr_array_clear(ptr_array *data)
-{
-    ptr_array_free(data);
-    ptr_array_init(data);
-}
-
-void ptr_array_free(ptr_array *data)
+void ptr_array_free(PtrArray *data)
 {
     for (int i = 0; i < data->length; i++) {
         data->items[i] = NULL;
     }
     free(data->items);
+}
+
+void ptr_array_clean(PtrArray *data)
+{
+    ptr_array_free(data);
+    ptr_array_init(data);
 }

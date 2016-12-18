@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#undef assert
+#undef ASSERT
 
-#define assert(expression) \
+#define ASSERT(expression) \
     Test_assert((int)(expression), #expression, __func__, __FILE__, __LINE__);
 
 void Test_assert(const int result, const char* const expression, 
