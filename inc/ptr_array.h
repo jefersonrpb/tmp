@@ -10,7 +10,7 @@ typedef struct ptr_array_t {
     int length;
 } PtrArray ;
 
-PtrArray *ptr_array_new();
+PtrArray *ptr_array_new(int size);
 void ptr_array_add(PtrArray *, void *);
 void ptr_array_set(PtrArray *, int, void *);
 void *ptr_array_get(PtrArray *, int);

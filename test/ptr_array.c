@@ -54,7 +54,7 @@ void test_clear()
 
 void tearup()
 {
-    array = ptr_array_new();
+    array = ptr_array_new(1);
 }
 
 void teardown()

@@ -4,11 +4,14 @@
 
 #define PTR_ARRAY_INIT_SIZE 4
 
-static void ptr_array_init(PtrArray *data)
+static void ptr_array_init(PtrArray *data, int size)
 {
-    data->size = PTR_ARRAY_INIT_SIZE;
+    data->size = size;
     data->length = 0;
     data->items = malloc(sizeof(void *) * data->size);
+    for (int i = 0; i < data->length; i++) {
+        data->items[i] = NULL;
+    }
 }
 
 static void ptr_array_resize(PtrArray *data, int size)
@@ -20,10 +23,10 @@ static void ptr_array_resize(PtrArray *data, int size)
     }
 }
 
-PtrArray *ptr_array_new()
+PtrArray *ptr_array_new(int size)
 {
     PtrArray* data = malloc(sizeof(PtrArray));
-    ptr_array_init(data);
+    ptr_array_init(data, size);
     return data;
 }
 
@@ -48,6 +51,7 @@ void ptr_array_set(PtrArray *data, int index, void *item)
         }
     }
 
+    data->length = index;
     data->items[index] = item;
 }
 
@@ -90,14 +94,11 @@ void ptr_array_delete(PtrArray *data, int index)
 
 void ptr_array_free(PtrArray *data)
 {
-    for (int i = 0; i < data->length; i++) {
-        data->items[i] = NULL;
-    }
     free(data->items);
 }
 
 void ptr_array_clean(PtrArray *data)
 {
     ptr_array_free(data);
-    ptr_array_init(data);
+    ptr_array_init(data, data->size);
 }
