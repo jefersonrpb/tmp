@@ -47,7 +47,9 @@ void ptr_array_set(PtrArray *data, int index, void *item)
         ptr_array_resize(data, index + PTR_ARRAY_INIT_SIZE);
     }
 
-    data->length = index+1;
+    if (index >= data->length) {
+        data->length = index + 1;
+    }
     data->items[index] = item;
 }
 
