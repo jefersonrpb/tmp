@@ -9,18 +9,17 @@ static void ptr_array_init(PtrArray *data, int size)
     data->size = size;
     data->length = 0;
     data->items = malloc(sizeof(void *) * data->size);
-    for (int i = 0; i < data->length; i++) {
-        data->items[i] = NULL;
-    }
 }
 
 static void ptr_array_resize(PtrArray *data, int size)
 {
     void **items = realloc(data->items, sizeof(void *) * size);
-    if (items) {
-        data->items = items;
-        data->size = size;
+    if (!items) {
+        printf("eror on realloc array\n");
+        exit(1);
     }
+    data->items = items;
+    data->size = size;
 }
 
 PtrArray *ptr_array_new(int size)
@@ -44,14 +43,11 @@ void ptr_array_set(PtrArray *data, int index, void *item)
         return;
     }
 
-    if (index > data->length) {
+    if (index >= data->size) {
         ptr_array_resize(data, index + PTR_ARRAY_INIT_SIZE);
-        for (int i = 0; i < index + 1; i++) {
-            ptr_array_add(data, NULL);
-        }
     }
 
-    data->length = index;
+    data->length = index+1;
     data->items[index] = item;
 }
 

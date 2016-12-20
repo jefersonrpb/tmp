@@ -27,7 +27,18 @@ void test_add_elements_sequentially()
 
 void test_access_boundings() 
 {
-    ASSERT(ptr_array_get(array, 0) == NULL);
+    int t1 = 33;
+    ptr_array_set(array, 5, &t1);
+
+    for (int i = 0; i < 5; i++) {
+        ASSERT(!ptr_array_has(array, i));
+        ASSERT(ptr_array_get(array, i) == NULL);
+    }
+
+    ASSERT(ptr_array_has(array, 5));
+    ASSERT(!ptr_array_has(array, 200));
+
+    ASSERT(ptr_array_get(array, 5) != NULL);
     ASSERT(ptr_array_get(array, 200) == NULL);
 }
 
@@ -54,7 +65,7 @@ void test_clear()
 
 void tearup()
 {
-    array = ptr_array_new(1);
+    array = ptr_array_new(20);
 }
 
 void teardown()
