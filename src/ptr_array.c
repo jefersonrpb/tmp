@@ -43,13 +43,14 @@ void ptr_array_set(PtrArray *data, int index, void *item)
         return;
     }
 
-    if (index >= data->size) {
-        ptr_array_resize(data, index + PTR_ARRAY_INIT_SIZE);
-    }
-
     if (index >= data->length) {
         data->length = index + 1;
     }
+
+    if (data->length >= data->size) {
+        ptr_array_resize(data, data->length + PTR_ARRAY_INIT_SIZE);
+    }
+
     data->items[index] = item;
 }
 
