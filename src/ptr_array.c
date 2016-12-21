@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "ptr_array.h"
 
 #define PTR_ARRAY_INIT_SIZE 4
@@ -8,7 +6,7 @@ static void ptr_array_init(PtrArray *data, int size)
 {
     data->size = size;
     data->length = 0;
-    data->items = malloc(sizeof(void *) * data->size);
+    data->items = calloc(data->size, sizeof(void *));
 }
 
 static void ptr_array_resize(PtrArray *data, int size)
@@ -18,6 +16,7 @@ static void ptr_array_resize(PtrArray *data, int size)
         printf("eror on realloc array\n");
         exit(1);
     }
+    memset(items + data->size, 0, size - data->size);
     data->items = items;
     data->size = size;
 }
@@ -43,13 +42,13 @@ void ptr_array_set(PtrArray *data, int index, void *item)
         return;
     }
 
-    if (index >= data->length) {
-        data->length = index + 1;
+    if (index >= data->size) {
+        ptr_array_resize(data, index + PTR_ARRAY_INIT_SIZE);
     }
 
-    if (data->length >= data->size) {
-        ptr_array_resize(data, data->length + PTR_ARRAY_INIT_SIZE);
-    }
+    if (index >= data->length) {
+        data->length = index + 1;
+    } 
 
     data->items[index] = item;
 }
@@ -85,10 +84,6 @@ void ptr_array_delete(PtrArray *data, int index)
     }
     data->items[data->length - 1] = NULL;
     data->length--;
-
-    if (data->length > 0 && data->length <= data->size / 4) {
-        ptr_array_resize(data, data->size / 2);
-    }
 }
 
 void ptr_array_free(PtrArray *data)

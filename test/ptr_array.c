@@ -21,8 +21,8 @@ void test_add_elements_sequentially()
 
     ASSERT(array->length == 3); 
     ASSERT(*((int*) ptr_array_get(array, 0)) == 10);
-    ASSERT(*((int*) ptr_array_get(array, 1)) == 20);
-    ASSERT(*((int*) ptr_array_get(array, 2)) == 30);
+    ASSERT(*((int*) ptr_array_get(array, 1)) == t2);
+    ASSERT(ptr_array_get(array, 2) == &t3);
 }
 
 void test_access_boundings() 
@@ -38,7 +38,7 @@ void test_access_boundings()
     ASSERT(ptr_array_has(array, 5));
     ASSERT(!ptr_array_has(array, 200));
 
-    ASSERT(ptr_array_get(array, 5) != NULL);
+    ASSERT(ptr_array_get(array, 5) == &t1);
     ASSERT(ptr_array_get(array, 200) == NULL);
 }
 
@@ -52,6 +52,7 @@ void test_check_position()
 void test_delete_position()
 {
     ptr_array_add(array, (void*) 1);
+    ASSERT(ptr_array_has(array, 0));
     ptr_array_delete(array, 0);
     ASSERT(!ptr_array_has(array, 0));
 }
