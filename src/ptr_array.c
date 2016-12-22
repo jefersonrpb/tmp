@@ -28,7 +28,7 @@ PtrArray *ptr_array_new(int size)
     return data;
 }
 
-void ptr_array_add(PtrArray *data, void *item)
+void ptr_array_push(PtrArray *data, void *item)
 {
     if (data->length == data->size) {
         ptr_array_resize(data, data->size + PTR_ARRAY_INIT_SIZE);
@@ -78,10 +78,8 @@ void ptr_array_splice(PtrArray *data, int index, int size)
         return;
     }
     data->items[index] = NULL;
-    for (int i = index; i < data->length - 1; i++) {
-        if (i + size < data->length) {
-            data->items[i] = data->items[i + size];
-        }
+    for (int i = index; i < data->length - 1 && i + size < data->length; i++) {
+        data->items[i] = data->items[i + size];
     }
     data->items[data->length - 1] = NULL;
     data->length -= size;
