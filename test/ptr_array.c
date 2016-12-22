@@ -51,10 +51,29 @@ void test_check_position()
 
 void test_delete_position()
 {
-    ptr_array_push(array, (void*) 1);
+    ptr_array_push(array, (void *) 33);
     ASSERT(ptr_array_has(array, 0));
     ptr_array_delete(array, 0);
     ASSERT(!ptr_array_has(array, 0));
+}
+
+void test_delete_range()
+{
+    int t1[6];
+    for (int i = 0; i < 6; i++) {
+        t1[i] = i;
+        ptr_array_push(array, &t1[i]);
+    }
+
+    ASSERT(array->length == 6);
+
+    ptr_array_splice(array, 2, 3);
+
+    ASSERT(array->length == 3);
+
+    ASSERT(ptr_array_get(array, 0) == &t1[0]);
+    ASSERT(ptr_array_get(array, 1) == &t1[1]);
+    ASSERT(ptr_array_get(array, 2) == &t1[5]);
 }
 
 void test_clear()
@@ -86,6 +105,7 @@ int main(int argc, char* argv[])
     Test_it("should not have access outside the boundings", test_access_boundings);
     Test_it("should check position", test_check_position);
     Test_it("should delete position", test_delete_position);
+    Test_it("should delete range", test_delete_range);
     Test_it("should clear array", test_clear);
 
     return Test_run();

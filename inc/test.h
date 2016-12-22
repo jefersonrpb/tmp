@@ -5,7 +5,7 @@
 #undef ASSERT
 
 #define ASSERT(expression) \
-    Test_assert((int)(expression), #expression, __func__, __FILE__, __LINE__);
+    Test_assert((int)(expression), #expression, __func__, __FILE__, __LINE__)
 
 void Test_assert(const int result, const char* const expression, 
                  const char * const func, const char * const file, const int line);

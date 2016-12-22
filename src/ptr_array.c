@@ -77,12 +77,19 @@ void ptr_array_splice(PtrArray *data, int index, int size)
     if (index < 0 || index >= data->length) {
         return;
     }
-    data->items[index] = NULL;
-    for (int i = index; i < data->length - 1 && i + size < data->length; i++) {
-        data->items[i] = data->items[i + size];
+
+    int i, length = data->length;
+
+    for (i = index; i < data->length; i++) {
+        if (i + size < data->length) {
+            data->items[i] = data->items[i + size];
+            continue;
+        } 
+        length--;
+        data->items[i] = NULL;
     }
-    data->items[data->length - 1] = NULL;
-    data->length -= size;
+
+    data->length = length;
 }
 
 void ptr_array_delete(PtrArray *data, int index)
