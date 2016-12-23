@@ -3,6 +3,7 @@
 #define ERROR_ASSERT_FAIL 1
 #define ERROR_MALLOC 2
 #define ERROR_REALLOC 3
+#define ERROR_UNINITIALIZED 4
 #define ANSI_COLOR_RED   "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
 #define ANSI_COLOR_RESET "\x1b[0m"
@@ -23,6 +24,8 @@ typedef struct {
     AssertionCount* assertion;
     int items_size;
     int items_length;
+    void (*tearup)(void);
+    void (*teardown)(void);
 } Test;
 
 typedef struct {
@@ -33,86 +36,97 @@ typedef struct {
     char buf[10240];
 } Globals;
 
-static void (*tearup)(void) = NULL;
-static void (*teardown)(void) = NULL;
-static Globals* _globals = NULL; 
+static Globals* globals = NULL; 
+static AssertionCount* assertion_new();
 
-static AssertionCount* _assertion_new();
-
-static void _fatal(int code) {
-
+static void fatal(int code) 
+{
+    char* message; 
     switch (code) {
         case ERROR_REALLOC:
-            printf("Error on reallocate memory\n");
+            message = "%s[fatal error] error on reallocate memory%s\n";
         break;
         case ERROR_MALLOC:
-            printf("Error on allocate memory\n");
+            message = "%s[fatal error] error on allocate memory%s\n";
+        break;
+        case ERROR_UNINITIALIZED:
+            message = "%s[fatal error] uninitialized test%s\n";
         break;
         default: 
-            printf("Unknow error\n");
+            message = "%s[fatal error] unknow error%s\n";
     }
 
+    printf(message, ANSI_COLOR_RED, ANSI_COLOR_RESET);
     exit(code);
 }
 
-static void _globals_init() {
+static void globals_init() 
+{
+    globals = malloc(sizeof(Globals));
 
-    _globals = malloc(sizeof(Globals));
-
-    if (_globals == NULL) {
-        _fatal(ERROR_MALLOC);
+    if (globals == NULL) {
+        fatal(ERROR_MALLOC);
     } 
 
-    _globals->tests_length = 0;
-    _globals->tests_size = 1;
-    _globals->assertion = _assertion_new();
+    globals->tests_length = 0;
+    globals->tests_size = 1;
+    globals->assertion = assertion_new();
 
     // alloc space for one test
-    _globals->tests = malloc(sizeof(Test));
+    globals->tests = malloc(sizeof(Test));
 }
 
-static void _test_item_resize(Test* test, int size) {
+static void test_check_initialized()
+{
+    if (globals == NULL || globals->tests_length == 0) {
+        fatal(ERROR_UNINITIALIZED);
+    }
+}
+
+static void test_item_resize(Test* test, int size) 
+{
     TestItem** items = realloc(test->items, sizeof(TestItem) * size); 
     if (items == NULL) {
-        _fatal(ERROR_REALLOC);
+        fatal(ERROR_REALLOC);
     }
     test->items = items;
     test->items_size = size;
 }
 
-static void _test_add(Test* test) {
-    
-    if (_globals->tests_length == _globals->tests_size) {
-        _globals->tests_size++;
-        _globals->tests = realloc(_globals->tests, sizeof(Test) * _globals->tests_size);
-        if (_globals->tests == NULL) {
-            _fatal(ERROR_REALLOC);
+static void test_add(Test* test) 
+{
+    if (globals->tests_length == globals->tests_size) {
+        globals->tests_size++;
+        globals->tests = realloc(globals->tests, sizeof(Test) * globals->tests_size);
+        if (globals->tests == NULL) {
+            fatal(ERROR_REALLOC);
         }
     }
 
-    _globals->tests[_globals->tests_length++] = test;
+    globals->tests[globals->tests_length++] = test;
 }
 
-static void _test_add_item(TestItem* item) {
-
-    Test* test = _globals->tests[_globals->tests_length - 1];
+static void test_add_item(TestItem* item) 
+{
+    Test* test = globals->tests[globals->tests_length - 1];
 
     if (test->items_length == test->items_size) {
-        _test_item_resize(test, test->items_size + 10);
+        test_item_resize(test, test->items_size + 10);
     }
 
     test->items[test->items_length++] = item;
 }
 
-static AssertionCount* _assertion_new() {
+static AssertionCount* assertion_new() 
+{
     AssertionCount* assertion = malloc(sizeof(AssertionCount));
     assertion->total = 0;
     assertion->failed = 0; 
     return assertion;
 }
 
-static TestItem* _item_new(char* label, void* fn) {
-
+static TestItem* item_new(char* label, void* fn) 
+{
     TestItem* item = malloc(sizeof(TestItem));
     item->label = malloc(sizeof(char) * strlen(label));
     item->fn = fn;
@@ -121,54 +135,54 @@ static TestItem* _item_new(char* label, void* fn) {
     return item;
 }
 
-static Test* _test_new(char* label) {
-
-    if (_globals == NULL) {
-        _globals_init();
+static Test* test_new(char* label) 
+{
+    if (globals == NULL) {
+        globals_init();
     }
 
     Test* test = malloc(sizeof(Test));
     test->items_length = 0;
     test->items_size = 10;
     test->items = malloc(sizeof(TestItem) * test->items_size);
-    test->assertion = _assertion_new();
+    test->assertion = assertion_new();
     test->label = malloc(sizeof(char) * strlen(label));
     strcpy(test->label, label);
 
     return test; 
 } 
 
-static int _test_run(int test_index) {
-
-    Test* test = _globals->tests[test_index];
+static int test_run(int test_index) 
+{
+    Test* test = globals->tests[test_index];
     printf(" %s\n\n", test->label);
 
     for (int item_index = 0; item_index < test->items_length; item_index++) {
 
         TestItem* item = test->items[item_index];
 
-        _globals->assertion->total = 0;
-        _globals->assertion->failed = 0;
+        globals->assertion->total = 0;
+        globals->assertion->failed = 0;
 
-        if (tearup) {
-            (*tearup)();
+        if (test->tearup) {
+            (*test->tearup)();
         }
 
         (*item->fn)(); 
 
-        if (teardown) {
-            (*teardown)();
+        if (test->teardown) {
+            (*test->teardown)();
         }
 
-        test->assertion->total += _globals->assertion->total;
-        test->assertion->failed += _globals->assertion->failed;
+        test->assertion->total += globals->assertion->total;
+        test->assertion->failed += globals->assertion->failed;
 
         // √ × ✓ ✖
-        if (_globals->assertion->failed == 0) {
+        if (globals->assertion->failed == 0) {
             printf("%s    √ %s%s\n", ANSI_COLOR_GREEN, ANSI_COLOR_RESET, item->label);
         } else {
             printf("%s    × %s%s\n", ANSI_COLOR_RED, ANSI_COLOR_RESET, item->label);
-            printf("%s", _globals->buf);
+            printf("%s", globals->buf);
         }
     }
 
@@ -178,78 +192,90 @@ static int _test_run(int test_index) {
     return test->assertion->failed;
 }
 
-static void _test_clean(int index) {
-
-    Test* test = _globals->tests[index];
+static void test_clean(int index) 
+{
+    Test* test = globals->tests[index];
 
     free(test->label);
     free(test->items);
     free(test->assertion);
     free(test);
 
-    _globals->tests[index] = NULL; 
+    globals->tests[index] = NULL; 
 }
 
-static void _globals_clean() {
-    for (int index = 0; index < _globals->tests_length; index++) {
-        _test_clean(index);
+static void globals_clean() 
+{
+    for (int index = 0; index < globals->tests_length; index++) {
+        test_clean(index);
     }
-    free(_globals->tests);
-    free(_globals->assertion);
-    _globals = NULL;
+    free(globals->tests);
+    free(globals->assertion);
+    globals = NULL;
 }
 
 void Test_assert(const int result, const char* const expression, 
-                 const char * const func, const char * const file, const int line)  {
-    _globals->assertion->total++;
+                 const char * const func, const char * const file, const int line)
+{
+    test_check_initialized();
+    globals->assertion->total++;
     if (result == 0) {
-        _globals->assertion->failed++;
+        globals->assertion->failed++;
         char buf[1024];
         sprintf(buf, "\r         fail %s on %s:%d\n", expression, file, line);
-        strcat(_globals->buf, buf);
+        strcat(globals->buf, buf);
     }
 }
 
-int Test_describe(char* label) {
-
-    Test* test = _test_new(label);
-    _test_add(test);
+int Test_describe(char* label) 
+{
+    Test* test = test_new(label);
+    test_add(test);
     return 0;
 }
 
-int Test_it(char* label, void* fn) {
-
-    TestItem* item = _item_new(label, fn);
-    _test_add_item(item);
+int Test_it(char* label, void* fn) 
+{
+    test_check_initialized();
+    TestItem* item = item_new(label, fn);
+    test_add_item(item);
     return 0;
 }
 
-int Test_tearup(void* fn) {
-    tearup = fn;
+int Test_tearup(void* fn) 
+{
+    test_check_initialized();
+    Test* test = globals->tests[globals->tests_length - 1];
+    test->tearup = fn;
     return 0;
 }
 
-int Test_teardown(void* fn) {
-    teardown = fn;
+int Test_teardown(void* fn) 
+{
+    test_check_initialized();
+    Test* test = globals->tests[globals->tests_length - 1];
+    test->teardown = fn;
     return 0;
 }
 
-int Test_run() {
+int Test_run() 
+{
+    test_check_initialized();
 
-    if (_globals->tests_length == 0 ) {
+    if (globals->tests_length == 0 ) {
         return 0;
     }
-    
+
     int failed = 0;
 
-    for (int index = 0; index < _globals->tests_length; index++) {
+    for (int index = 0; index < globals->tests_length; index++) {
         if (index <= 1) {
             printf("\n");
         }
-        failed += _test_run(index);
+        failed += test_run(index);
     }
 
-    _globals_clean();
+    globals_clean();
 
     printf("\n");
 

@@ -1,7 +1,7 @@
 #include <test.h>
-#include <ptr_array.h>
+#include <int_array.h>
 
-PtrArray* array;
+IntArray* array = NULL;
 
 void test_empty() 
 {
@@ -13,46 +13,43 @@ void test_add_elements_sequentially()
 {
     int t1 = 10, t2 = 20, t3 = 30;
 
-    ptr_array_push(array, &t1);
-    ptr_array_push(array, &t2);
-    ptr_array_push(array, &t3);
+    int_array_push(array, t1);
+    int_array_push(array, t2);
+    int_array_push(array, t3);
 
     ASSERT(array->length == 3); 
-    ASSERT(*((int*) ptr_array_get(array, 0)) == 10);
-    ASSERT(*((int*) ptr_array_get(array, 1)) == t2);
-    ASSERT(ptr_array_get(array, 2) == &t3);
+    ASSERT(int_array_get(array, 0) == 10);
+    ASSERT(int_array_get(array, 1) == t2);
+    ASSERT(int_array_get(array, 2) == t3);
 }
 
 void test_access_boundings() 
 {
     int t1 = 33;
-    ptr_array_set(array, 5, &t1);
+    int_array_set(array, 5, t1);
 
     for (int i = 0; i < 5; i++) {
-        ASSERT(!ptr_array_has(array, i));
-        ASSERT(ptr_array_get(array, i) == NULL);
+        ASSERT(!int_array_has(array, i));
     }
 
-    ASSERT(ptr_array_has(array, 5));
-    ASSERT(!ptr_array_has(array, 200));
-
-    ASSERT(ptr_array_get(array, 5) == &t1);
-    ASSERT(ptr_array_get(array, 200) == NULL);
+    ASSERT(int_array_has(array, 5));
+    ASSERT(int_array_get(array, 5) == t1);
+    ASSERT(!int_array_has(array, 200));
 }
 
 void test_check_position() 
 {
-    ASSERT(!ptr_array_has(array, 0));
-    ptr_array_push(array, (void*) 1);
-    ASSERT(ptr_array_has(array, 0));
+    ASSERT(!int_array_has(array, 0));
+    int_array_push(array, 1);
+    ASSERT(int_array_has(array, 0));
 }
 
 void test_delete_position()
 {
-    ptr_array_push(array, (void *) 33);
-    ASSERT(ptr_array_has(array, 0));
-    ptr_array_delete(array, 0);
-    ASSERT(!ptr_array_has(array, 0));
+    int_array_push(array, 33);
+    ASSERT(int_array_has(array, 0));
+    int_array_delete(array, 0);
+    ASSERT(!int_array_has(array, 0));
 }
 
 void test_delete_range()
@@ -60,40 +57,40 @@ void test_delete_range()
     int t1[6];
     for (int i = 0; i < 6; i++) {
         t1[i] = i;
-        ptr_array_push(array, &t1[i]);
+        int_array_push(array, t1[i]);
     }
 
     ASSERT(array->length == 6);
 
-    ptr_array_splice(array, 2, 3);
+    int_array_splice(array, 2, 3);
 
     ASSERT(array->length == 3);
 
-    ASSERT(ptr_array_get(array, 0) == &t1[0]);
-    ASSERT(ptr_array_get(array, 1) == &t1[1]);
-    ASSERT(ptr_array_get(array, 2) == &t1[5]);
+    ASSERT(int_array_get(array, 0) == t1[0]);
+    ASSERT(int_array_get(array, 1) == t1[1]);
+    ASSERT(int_array_get(array, 2) == t1[5]);
 }
 
 void test_clear()
 {
     test_add_elements_sequentially();
-    ptr_array_clean(array);
+    int_array_clean(array);
     test_empty();
 }
 
 void tearup()
 {
-    array = ptr_array_new(20);
+    array = int_array_new(20);
 }
 
 void teardown()
 {
-    ptr_array_free(array);
+    int_array_free(array);
 }
 
 int main(int argc, char* argv[]) 
 {
-    Test_describe("ptr_array()");
+    Test_describe("int_array()");
 
     Test_tearup(tearup);
     Test_teardown(teardown);
