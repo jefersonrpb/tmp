@@ -179,9 +179,9 @@ static int test_run(int test_index)
 
         // √ × ✓ ✖
         if (globals->assertion->failed == 0) {
-            printf("%s    √ %s%s\n", ANSI_COLOR_GREEN, ANSI_COLOR_RESET, item->label);
+            printf("    %s√%s %s\n", ANSI_COLOR_GREEN, ANSI_COLOR_RESET, item->label);
         } else {
-            printf("%s    × %s%s\n", ANSI_COLOR_RED, ANSI_COLOR_RESET, item->label);
+            printf("    %s×%s %s\n", ANSI_COLOR_RED, ANSI_COLOR_RESET, item->label);
             printf("%s", globals->buf);
         }
     }

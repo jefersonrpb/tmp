@@ -31,13 +31,13 @@ obj/test.o: src/test.c
 	mkdir -p obj/
 	$(CC) $^ -c -o $@ $(FLAG_INC)
 
-obj/board.o: src/board.c 
+obj/board.o: 
 	mkdir -p obj/
 	$(CC) src/board.c -c -o $@ $(FLAG_INC) $(FLAG_DEBUG) $(FLAG_LIB)
 
-obj/window.o: obj/board.o src/window.c
+obj/window.o: obj/board.o
 	mkdir -p obj/
-	$(CC) $^ -c -o $@ $(FLAG_INC) $(FLAG_DEBUG) $(FLAG_LIB)
+	$(CC) $^ src/window.c -c -o $@ $(FLAG_INC) $(FLAG_DEBUG) $(FLAG_LIB)
 
 test_window: obj/test.o obj/window.o obj/board.o
 	$(CC) $^ test/window.c -o bin/test/window $(FLAG_INC) $(FLAG_DEBUG) $(FLAG_LIB) 
@@ -47,3 +47,4 @@ test_window: obj/test.o obj/window.o obj/board.o
 # 	$(CC) test/ptr_array.c $^ -o bin/test/ptr_array -lncurses -Wall -Werror -ggdb -I inc
 #
 # format: # 	astyle --options=$(HOME)/.astyle_format.conf *.c *.h
+# DO NOT DELETE
