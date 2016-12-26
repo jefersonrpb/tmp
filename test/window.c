@@ -31,7 +31,7 @@ void test_sizes()
     ASSERT(window->height >= height);
 }
 
-void tearup()
+void setup()
 {
     window = window_create(width, height);
 }
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 {
     Test_describe("window()");
 
-    Test_tearup(tearup);
+    Test_setup(setup);
     Test_teardown(teardown);
 
     Test_it("should fit in screen", test_sizes);

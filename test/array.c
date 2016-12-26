@@ -72,7 +72,7 @@ void test_delete_range()
     ASSERT(array_get(array, 2, array_length) == &t1[5]);
 }
 
-void tearup()
+void setup()
 {
     array = array_new(array_size);
 }
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 {
     Test_describe("array()");
 
-    Test_tearup(tearup);
+    Test_setup(setup);
     Test_teardown(teardown);
 
     Test_it("should add elements sequentially", test_add_elements_sequentially);

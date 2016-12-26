@@ -24,7 +24,7 @@ typedef struct {
     AssertionCount* assertion;
     int items_size;
     int items_length;
-    void (*tearup)(void);
+    void (*setup)(void);
     void (*teardown)(void);
 } Test;
 
@@ -164,8 +164,8 @@ static int test_run(int test_index)
         globals->assertion->total = 0;
         globals->assertion->failed = 0;
 
-        if (test->tearup) {
-            (*test->tearup)();
+        if (test->setup) {
+            (*test->setup)();
         }
 
         (*item->fn)(); 
@@ -242,11 +242,11 @@ int Test_it(char* label, void* fn)
     return 0;
 }
 
-int Test_tearup(void* fn) 
+int Test_setup(void* fn) 
 {
     test_check_initialized();
     Test* test = globals->tests[globals->tests_length - 1];
-    test->tearup = fn;
+    test->setup = fn;
     return 0;
 }
 

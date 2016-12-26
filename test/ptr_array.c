@@ -81,7 +81,7 @@ void test_clear()
     test_empty();
 }
 
-void tearup()
+void setup()
 {
     array = ptr_array_new(20);
 }
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 {
     Test_describe("ptr_array()");
 
-    Test_tearup(tearup);
+    Test_setup(setup);
     Test_teardown(teardown);
 
     Test_it("should start empty", test_empty);

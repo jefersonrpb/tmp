@@ -12,7 +12,7 @@ void Test_assert(const int result, const char* const expression,
 
 int Test_describe(char* label);
 int Test_it(char* label, void * fn);
-int Test_tearup(void* fn);
+int Test_setup(void* fn);
 int Test_teardown(void* fn);
 int Test_run();
 
