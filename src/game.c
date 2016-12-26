@@ -1,6 +1,6 @@
 #include "game.h"
 
-void tick(Game* game);
+void static tick(Game* game);
 void static update(Game* game);
 void static draw(Game* game); 
 
@@ -34,7 +34,7 @@ void static draw(Game* game)
 
 }
 
-void tick(Game* game)
+void static tick(Game* game)
 {
     do {
         update(game);
