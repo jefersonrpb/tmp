@@ -1,16 +1,16 @@
-#ifndef PTR_ARRAY_H
-#define PTR_ARRAY_H
+#ifndef INT_ARRAY_H
+#define INT_ARRAY_H
 
 #include <array.h>
 
-typedef struct int_array_t {
+typedef struct {
     void **items;
     int size;
     int length;
 } IntArray ;
 
-IntArray *int_array_new(int size);
-void int_array_free(IntArray *data);
+IntArray *int_array_create(int size);
+void int_array_destroy(IntArray *data);
 void int_array_clean(IntArray *data);
 void int_array_push(IntArray *data, int item);
 bool int_array_has(IntArray *data, int index);

@@ -5,7 +5,7 @@ void** array = NULL;
 int array_length = 0;
 int array_size = 20;
 
-void test_add_elements_sequentially()
+void test_add_elements()
 {
     int t1 = 10, t2 = 20, t3 = 30;
 
@@ -74,12 +74,12 @@ void test_delete_range()
 
 void setup()
 {
-    array = array_new(array_size);
+    array = array_create(array_size);
 }
 
 void teardown()
 {
-    array_free(array);
+    array_destroy(array);
     array_length = 0;
     array_size = 20;
 }
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     Test_setup(setup);
     Test_teardown(teardown);
 
-    Test_it("should add elements sequentially", test_add_elements_sequentially);
+    Test_it("should add elements", test_add_elements);
     Test_it("should not have access outside the boundings", test_access_boundings);
     Test_it("should check position", test_check_position);
     Test_it("should delete position", test_delete_position);

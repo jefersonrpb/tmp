@@ -37,7 +37,7 @@ typedef struct {
 } Globals;
 
 static Globals* globals = NULL; 
-static AssertionCount* assertion_new();
+static AssertionCount* assertion_create();
 
 static void fatal(int code) 
 {
@@ -70,7 +70,7 @@ static void globals_init()
 
     globals->tests_length = 0;
     globals->tests_size = 1;
-    globals->assertion = assertion_new();
+    globals->assertion = assertion_create();
 
     // alloc space for one test
     globals->tests = malloc(sizeof(Test));
@@ -117,7 +117,7 @@ static void test_add_item(TestItem* item)
     test->items[test->items_length++] = item;
 }
 
-static AssertionCount* assertion_new() 
+static AssertionCount* assertion_create() 
 {
     AssertionCount* assertion = malloc(sizeof(AssertionCount));
     assertion->total = 0;
@@ -125,7 +125,7 @@ static AssertionCount* assertion_new()
     return assertion;
 }
 
-static TestItem* item_new(char* label, void* fn) 
+static TestItem* item_create(char* label, void* fn) 
 {
     TestItem* item = malloc(sizeof(TestItem));
     item->label = malloc(sizeof(char) * strlen(label));
@@ -135,7 +135,7 @@ static TestItem* item_new(char* label, void* fn)
     return item;
 }
 
-static Test* test_new(char* label) 
+static Test* test_create(char* label) 
 {
     if (globals == NULL) {
         globals_init();
@@ -145,7 +145,7 @@ static Test* test_new(char* label)
     test->items_length = 0;
     test->items_size = 10;
     test->items = malloc(sizeof(TestItem) * test->items_size);
-    test->assertion = assertion_new();
+    test->assertion = assertion_create();
     test->label = malloc(sizeof(char) * strlen(label));
     strcpy(test->label, label);
 
@@ -229,7 +229,7 @@ void Test_assert(const int result, const char* const expression,
 
 int Test_describe(char* label) 
 {
-    Test* test = test_new(label);
+    Test* test = test_create(label);
     test_add(test);
     return 0;
 }
@@ -237,7 +237,7 @@ int Test_describe(char* label)
 int Test_it(char* label, void* fn) 
 {
     test_check_initialized();
-    TestItem* item = item_new(label, fn);
+    TestItem* item = item_create(label, fn);
     test_add_item(item);
     return 0;
 }

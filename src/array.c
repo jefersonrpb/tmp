@@ -13,7 +13,7 @@ void array_resize(void **data, int size, int* data_size)
     *data_size = size;
 }
 
-void** array_new(int size)
+void** array_create(int size)
 {
     void** data = calloc(size, sizeof(void*));
     return data;
@@ -89,7 +89,7 @@ void array_delete(void** data, int index, int* data_length)
     (*data_length)--;
 }
 
-void array_free(void** data)
+void array_destroy(void** data)
 {
     free(data);
     data = NULL;

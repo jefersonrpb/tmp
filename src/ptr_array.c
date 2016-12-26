@@ -4,24 +4,24 @@ static void ptr_array_init(PtrArray *data, int size)
 {
     data->size = size;
     data->length = 0;
-    data->items = array_new(size);
+    data->items = array_create(size);
 }
 
-PtrArray *ptr_array_new(int size)
+PtrArray *ptr_array_create(int size)
 {
     PtrArray* data = malloc(sizeof(PtrArray));
     ptr_array_init(data, size);
     return data;
 }
 
-void ptr_array_free(PtrArray *data)
+void ptr_array_destroy(PtrArray *data)
 {
-    array_free(data->items);
+    array_destroy(data->items);
 }
 
 void ptr_array_clean(PtrArray *data)
 {
-    ptr_array_free(data);
+    ptr_array_destroy(data);
     ptr_array_init(data, data->size);
 }
 

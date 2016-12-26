@@ -3,14 +3,14 @@
 
 #include <array.h>
 
-typedef struct ptr_array_t {
+typedef struct {
     void **items;
     int size;
     int length;
 } PtrArray ;
 
-PtrArray *ptr_array_new(int size);
-void ptr_array_free(PtrArray *data);
+PtrArray *ptr_array_create(int size);
+void ptr_array_destroy(PtrArray *data);
 void ptr_array_clean(PtrArray *data);
 void ptr_array_push(PtrArray *data, void* item);
 bool ptr_array_has(PtrArray *data, int index);
