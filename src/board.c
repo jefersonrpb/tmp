@@ -1,13 +1,11 @@
 #include "board.h"
 
-Board* board_create()
+Board* board_create(int width, int height)
 {
     Board* board = malloc(sizeof(Board));
-
-    // 40x20 + 2 cells for bounds
-    board->width = 42;
-    board->height = 22;
-    board->length = board->width * board->height;
+    board->width = width;
+    board->height = height;
+    board->length = width * height;
 
     return board;
 }

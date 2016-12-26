@@ -3,8 +3,9 @@
 
 #include <ncurses.h>
 
-Board* board = NULL;
 Window* window = NULL;
+int width = 40;
+int height = 20;
 
 static bool window_has_string(int x, int y, char* string)
 {
@@ -26,14 +27,13 @@ void test_draw()
 
 void test_sizes()
 {
-    ASSERT(window->width >= board->width);
-    ASSERT(window->height >= board->height);
+    ASSERT(window->width >= width);
+    ASSERT(window->height >= height);
 }
 
 void tearup()
 {
-    board = board_create();
-    window = window_create(board);
+    window = window_create(width, height);
 }
 
 void teardown()

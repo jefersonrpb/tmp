@@ -1,23 +1,22 @@
 #include "window.h"
 #include <curses.h>
 
-void configure(Window* window, Board* board);
-void configure_resize(Window* window, Board* board);
-void configure_screen();
-void configure_color();
+static void configure(Window* window, int width, int height);
+static void configure_resize(Window* window, int width, int height);
+static void configure_screen();
+static void configure_color();
 
-//@TODO - remover dependencia Board, passar: int rows, int cols
-Window* window_create(Board* board)
+Window* window_create(int width, int height)
 {
     Window* window = malloc(sizeof(Window));
     window->_window = initscr();
 
-    configure(window, board);
+    configure(window, width, height);
 
     return window;
 }
 
-void window_draw_char(int x, int y, int value)
+void window_draw_char(int x, int y, char value)
 {
     mvaddch(y, x, value); 
 }
@@ -50,14 +49,14 @@ void window_destroy(Window* window)
     free(window);
 }
 
-void configure(Window* window, Board* board)
+static void configure(Window* window, int width, int height)
 {
-    configure_resize(window, board);
+    configure_resize(window, width, height);
     configure_screen();
     configure_color();
 }
 
-void configure_screen()
+static void configure_screen()
 {
     // set no waiting for Enter key
     cbreak(); 
@@ -84,7 +83,7 @@ void configure_screen()
     nodelay(stdscr, TRUE);
 }
 
-void configure_color()
+static void configure_color()
 {
     // allow transparent color
     use_default_colors();
@@ -99,18 +98,17 @@ void configure_color()
     init_pair(COLOR_YELLOW, COLOR_YELLOW, -1); 
 }
 
-void configure_resize(Window* window, Board* board)
+static void configure_resize(Window* window, int width, int height)
 {
     getmaxyx((WINDOW*) window->_window, window->height, window->width); 
 
-    if (window->height < board->height || window->width < board->width) {
+    if (window->width < width || window->height < height) {
         window_restore();
-        printf(" - you need resize terminal to: cols %d rows %d", board->width, board->height);
+        printf(" - you need resize terminal to: cols %d rows %d", width, height);
         printf("\n - current size: cols %d rows %d\n", window->width, window->height);
         exit(1);
     } 
 
     // set screen size
-    wresize(window->_window, board->height, board->width); 
+    wresize(window->_window, height, width); 
 }
-

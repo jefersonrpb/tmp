@@ -14,7 +14,7 @@ typedef struct {
 
 } Board;
 
-Board* board_create();
+Board* board_create(int width, int height);
 void board_destroy(Board* board);
 
 #endif
