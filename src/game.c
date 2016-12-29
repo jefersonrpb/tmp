@@ -24,6 +24,15 @@ void game_start(Game* game)
     tick(game);
 }
 
+void static tick(Game* game)
+{
+    do {
+        update(game);
+        draw(game);
+        usleep(FPS);
+    } while (true);
+}
+
 void static update(Game* game) 
 {
 
@@ -32,13 +41,4 @@ void static update(Game* game)
 void static draw(Game* game) 
 {
 
-}
-
-void static tick(Game* game)
-{
-    do {
-        update(game);
-        draw(game);
-        usleep(FPS);
-    } while (true);
 }
