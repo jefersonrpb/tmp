@@ -81,30 +81,29 @@ void test_clear()
     test_empty();
 }
 
-void setup()
+void test_setup()
 {
     array = ptr_array_create(20);
 }
 
-void teardown()
+void test_teardown()
 {
     ptr_array_destroy(array);
 }
 
 int main(int argc, char* argv[]) 
 {
-    Test_describe("ptr_array()");
-
-    Test_setup(setup);
-    Test_teardown(teardown);
-
-    Test_it("should start empty", test_empty);
-    Test_it("should add elements", test_add_elements);
-    Test_it("should not have access outside the boundings", test_access_boundings);
-    Test_it("should check position", test_check_position);
-    Test_it("should delete position", test_delete_position);
-    Test_it("should delete range", test_delete_range);
-    Test_it("should clear array", test_clear);
+    describe("ptr_array()", {
+        setup(test_setup);
+        teardown(test_teardown);
+        it("should start empty", test_empty);
+        it("should add elements", test_add_elements);
+        it("should not have access outside the boundings", test_access_boundings);
+        it("should check position", test_check_position);
+        it("should delete position", test_delete_position);
+        it("should delete range", test_delete_range);
+        it("should clear array", test_clear);
+    });
 
     return Test_run();
 }

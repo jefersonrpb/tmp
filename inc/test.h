@@ -16,3 +16,12 @@ int Test_setup(void* fn);
 int Test_teardown(void* fn);
 int Test_run();
 
+#define describe(describe_label, block) do {\
+    int (*it)(char* label, void* fn) = Test_it;\
+    int (*setup)(void* fn) = Test_setup;\
+    int (*teardown)(void* fn) = Test_teardown;\
+    Test_describe(describe_label);\
+    block\
+    (void)setup;\
+    (void)teardown;\
+} while(0)

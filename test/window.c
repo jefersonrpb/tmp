@@ -31,25 +31,24 @@ void test_sizes()
     ASSERT(window->height >= height);
 }
 
-void setup()
+void test_setup()
 {
     window = window_create(width, height);
 }
 
-void teardown()
+void test_teardown()
 {
     window_restore();
 }
 
 int main(int argc, char* argv[]) 
 {
-    Test_describe("window()");
-
-    Test_setup(setup);
-    Test_teardown(teardown);
-
-    Test_it("should fit in screen", test_sizes);
-    Test_it("should draw", test_draw);
+    describe("window()", {
+      setup(test_setup);
+      teardown(test_teardown);
+      it("should fit in screen", test_sizes);
+      it("should draw", test_draw);
+    });
 
     return Test_run();
 }
