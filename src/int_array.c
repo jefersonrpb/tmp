@@ -13,7 +13,7 @@ static void* int_to_ptr(int item)
 }
 
 static int ptr_to_int(void* item)
-{            
+{
     return (int) (long int) item;
 }
 

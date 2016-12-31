@@ -2,7 +2,7 @@
 
 void static tick(Game* game);
 void static update(Game* game);
-void static draw(Game* game); 
+void static draw(Game* game);
 
 Game* game_create(Window* window, Board* board)
 {
@@ -33,12 +33,12 @@ void static tick(Game* game)
     } while (true);
 }
 
-void static update(Game* game) 
+void static update(Game* game)
 {
 
 }
 
-void static draw(Game* game) 
+void static draw(Game* game)
 {
 
 }

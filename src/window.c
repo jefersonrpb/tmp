@@ -18,7 +18,7 @@ Window* window_create(int width, int height)
 
 void window_draw_char(int x, int y, char value)
 {
-    mvaddch(y, x, value); 
+    mvaddch(y, x, value);
 }
 
 void window_draw_string(int x, int y, char* value)
@@ -37,10 +37,10 @@ void window_quit()
     exit(0);
 }
 
-void window_restore() 
+void window_restore()
 {
     // curses call to restore the original window and leave
-    endwin(); 
+    endwin();
 }
 
 void window_destroy(Window* window)
@@ -59,16 +59,16 @@ static void configure(Window* window, int width, int height)
 static void configure_screen()
 {
     // set no waiting for Enter key
-    cbreak(); 
+    cbreak();
 
     // disable Echo
-    noecho(); 
+    noecho();
 
     // clear screen, send cursor to position (0,0)
-    clear(); 
+    clear();
 
     // implement all changes since last refresh
-    refresh(); 
+    refresh();
 
     // don't display a cursor
     curs_set(false);
@@ -95,20 +95,20 @@ static void configure_color()
     init_pair(COLOR_BLUE, COLOR_BLUE, -1);
     init_pair(COLOR_RED, COLOR_RED, -1);
     init_pair(COLOR_GREEN, COLOR_GREEN, -1);
-    init_pair(COLOR_YELLOW, COLOR_YELLOW, -1); 
+    init_pair(COLOR_YELLOW, COLOR_YELLOW, -1);
 }
 
 static void configure_resize(Window* window, int width, int height)
 {
-    getmaxyx((WINDOW*) window->_window, window->height, window->width); 
+    getmaxyx((WINDOW*) window->_window, window->height, window->width);
 
     if (window->width < width || window->height < height) {
         window_restore();
         printf(" - you need resize terminal to: cols %d rows %d", width, height);
         printf("\n - current size: cols %d rows %d\n", window->width, window->height);
         exit(1);
-    } 
+    }
 
     // set screen size
-    wresize(window->_window, height, width); 
+    wresize(window->_window, height, width);
 }

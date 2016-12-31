@@ -14,7 +14,6 @@ debug:
 	mkdir -p bin/
 	$(CC) -Wall -Werror -ggdb src/*.c -o bin/$(OUTFILE) -lncurses -I inc
 
-.PHONY: clean
 clean:
 	rm -rf bin/*
 
@@ -29,6 +28,5 @@ test:
 		bin/test/$$key;\
 	done
 
-
 format: 
-	astyle --options=$(HOME)/.astyle_format.conf *.c *.h
+	astyle --style="k&r" src/*.c inc/*.h

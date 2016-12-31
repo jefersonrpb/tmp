@@ -14,10 +14,10 @@ typedef struct {
 
 } Window;
 
-enum draw { 
-    WALL = '#', 
+enum draw {
+    WALL = '#',
     EMPTY = ' ',
-    BOUND_CORNER = '+',    
+    BOUND_CORNER = '+',
     BOUND_LINE_VERTICAL = '|',
     BOUND_LINE_HORIZONTAL = '-'
 };

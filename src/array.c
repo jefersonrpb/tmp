@@ -39,7 +39,7 @@ void array_set(void** data, int index, void* item, int* data_length, int* data_s
 
     if (index >= *data_length) {
         *data_length = index + 1;
-    } 
+    }
 
     data[index] = item;
 }
@@ -60,7 +60,7 @@ void* array_get(void** data, int index, int data_length)
     return NULL;
 }
 
-void array_splice(void** data, int index, int size, int* data_length) 
+void array_splice(void** data, int index, int size, int* data_length)
 {
     if (index < 0 || index >= *data_length) {
         return;
@@ -72,7 +72,7 @@ void array_splice(void** data, int index, int size, int* data_length)
         if (i + size < *data_length) {
             data[i] = data[i + size];
             continue;
-        } 
+        }
         length--;
         data[i] = NULL;
     }
