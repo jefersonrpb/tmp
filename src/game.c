@@ -1,14 +1,13 @@
 #include "game.h"
 
 void static tick(Game* game);
-void static update(Game* game);
-void static draw(Game* game);
 
-Game* game_create(Window* window, Board* board)
+Game* game_create(Window* window, Board* board, State* state)
 {
     Game* game = malloc(sizeof(Game));
     game->window = window;
     game->board = board;
+    game->state = state;
     return game;
 }
 
@@ -27,18 +26,8 @@ void game_start(Game* game)
 void static tick(Game* game)
 {
     do {
-        update(game);
-        draw(game);
+        game->state->update();
+        game->state->draw();
         usleep(FPS);
     } while (true);
-}
-
-void static update(Game* game)
-{
-
-}
-
-void static draw(Game* game)
-{
-
 }

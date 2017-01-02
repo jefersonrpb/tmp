@@ -1,5 +1,4 @@
 #ifndef BOARD_H
-
 #define BOARD_H
 
 #include <stdlib.h>
@@ -11,6 +10,9 @@ typedef struct {
 
     // allow directions to move
     int moves[4];
+    
+    // 2d map store in single dimensional array
+    int* map;
 
 } Board;
 

@@ -7,7 +7,8 @@ int main()
 
     Board* board = board_create(width, height);
     Window* window = window_create(width, height);
-    Game* game = game_create(window, board);
+    State* Menu = menu_create();
+    Game* game = game_create(window, board, menu);
 
     game_start(game);
 

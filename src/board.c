@@ -6,6 +6,7 @@ Board* board_create(int width, int height)
     board->width = width;
     board->height = height;
     board->length = width * height;
+    board->map = malloc(sizeof(int) * board->length);
 
     return board;
 }

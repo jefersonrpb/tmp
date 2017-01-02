@@ -18,8 +18,7 @@ typedef struct {
 
     Window* window;
     Board* board;
-
-    int state;
+    State* state;
 
 } Game;
 
