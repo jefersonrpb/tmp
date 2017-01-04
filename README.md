@@ -1,4 +1,26 @@
 
+src/
+    core/
+        board.c
+        game.c
+        window.c
+        negamax.c
+        input.c
+        player.c
+        ai.c
+    state/
+        menu.c
+        play.c
+        win.c
+    common/
+        array.c
+        int_array.c
+        ptr_array.c
+        test.c
+    main.c
+
+
+
 roadmap
     version 1.0 (current)
         + ncurses

@@ -2,12 +2,12 @@
 
 void static tick(Game* game);
 
-Game* game_create(Window* window, Board* board, State* state)
+Game* game_create(Window* window, Board* board, Input* input)
 {
     Game* game = malloc(sizeof(Game));
     game->window = window;
     game->board = board;
-    game->state = state;
+    game->input = input;
     return game;
 }
 
@@ -16,6 +16,11 @@ void game_destroy(Game* game)
     board_destroy(game->board);
     window_destroy(game->window);
     free(game);
+}
+
+void game_set_state(Game* game, State* state) 
+{
+    game->state = state;
 }
 
 void game_start(Game* game)
