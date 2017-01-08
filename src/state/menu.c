@@ -23,5 +23,10 @@ static void update(Game* game)
 
 static void draw(Game* game)
 {
-
+    static int count = 0;
+    count++;
+    char buf[100];
+    sprintf(buf, "menu.c: %d", count);
+    window_draw_string(1, 1, buf);
+    window_refresh();
 }

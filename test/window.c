@@ -1,5 +1,5 @@
-#include "test.h"
-#include "window.h"
+#include "common/test.h"
+#include "core/window.h"
 
 #include <ncurses.h>
 

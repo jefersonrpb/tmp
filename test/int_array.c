@@ -1,5 +1,5 @@
-#include <test.h>
-#include <int_array.h>
+#include "common/test.h"
+#include "common/int_array.h"
 
 IntArray* array = NULL;
 

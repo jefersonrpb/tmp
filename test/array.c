@@ -1,5 +1,5 @@
-#include <test.h>
-#include <array.h>
+#include "common/test.h"
+#include "common/array.h"
 
 void** array = NULL;
 int array_length = 0;

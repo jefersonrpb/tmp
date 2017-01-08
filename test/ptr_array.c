@@ -1,5 +1,5 @@
-#include <test.h>
-#include <ptr_array.h>
+#include "common/test.h"
+#include "common/ptr_array.h"
 
 PtrArray* array;
 

@@ -6,9 +6,6 @@
 #include <time.h>
 #include <unistd.h>
 
-// just for avoid circular dependency
-typedef struct Game Game;
-
 #include "core/window.h"
 #include "core/board.h"
 #include "core/input.h"
@@ -17,7 +14,10 @@ typedef struct Game Game;
 #define SECOND 1000000
 #define FPS SECOND / 10
 
-struct Game{
+// just for avoid circular dependency
+typedef struct Game Game;
+
+struct Game {
     Window* window;
     Board* board;
     Input* input;
