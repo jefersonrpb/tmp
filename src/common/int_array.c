@@ -1,4 +1,4 @@
-#include "int_array.h"
+#include "common/int_array.h"
 
 static void int_array_init(IntArray *data, int size)
 {

@@ -1,3 +1,5 @@
+#ifndef TEST_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,3 +27,5 @@ int Test_run();
     (void)setup;\
     (void)teardown;\
 } while(0)
+
+#endif

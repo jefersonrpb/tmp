@@ -1,4 +1,4 @@
-#include "window.h"
+#include "core/window.h"
 #include <curses.h>
 
 static void configure(Window* window, int width, int height);

@@ -1,7 +1,7 @@
 #ifndef PTR_ARRAY_H
 #define PTR_ARRAY_H
 
-#include <array.h>
+#include "common/array.h"
 
 typedef struct {
     void **items;

@@ -1,4 +1,4 @@
-#include "array.h"
+#include "common/array.h"
 
 #define ARRAY_INIT_SIZE 4
 

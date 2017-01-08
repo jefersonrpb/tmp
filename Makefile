@@ -1,18 +1,16 @@
 CC = gcc -std=gnu99
-OUTFILE = game
 FLAG_LIB = -lncurses
 FLAG_DEBUG = -Wall -Werror -ggdb
 FLAG_INC = -I inc
-
 SOURCES:=$(shell find src -type f | grep -v "main.c")
 
 all:
 	mkdir -p bin/
-	$(CC) src/*.c -o bin/$(OUTFILE) -lncurses -I inc
+	$(CC) $(SOURCES) src/main.c -o bin/game $(FLAG_LIB) $(FLAG_INC)
 
 debug: 
 	mkdir -p bin/
-	$(CC) -Wall -Werror -ggdb src/*.c -o bin/$(OUTFILE) -lncurses -I inc
+	$(CC) $(SOURCES) src/main.c -o bin/debug $(FLAG_LIB) $(FLAG_INC) $(FLAG_DEBUG) 
 
 clean:
 	rm -rf bin/*
@@ -21,7 +19,7 @@ clean:
 test:
 	mkdir -p bin/test
 	for path in $$(ls test/*.c); do key=$$(basename $$path .c); echo "instal: $$path";\
-		$$($(CC) $(SOURCES) $$path -o bin/test/$$key -lncurses -I inc -Wall -Werror -ggdb); \
+		$$($(CC) $(SOURCES) $$path -o bin/test/$$key $(FLAG_LIB) $(FLAG_INC) $(FLAG_DEBUG)); \
 	done;\
 	echo "run tests";\
 	for path in $$(ls test/*.c); do key=$$(basename $$path .c);\
@@ -29,4 +27,4 @@ test:
 	done
 
 format: 
-	astyle --style="k&r" src/*.c inc/*.h
+	astyle --style="k&r" $(shell find src -type f) $(shell find inc -type f)

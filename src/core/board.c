@@ -1,4 +1,4 @@
-#include "board.h"
+#include "core/board.h"
 
 Board* board_create(int width, int height)
 {
